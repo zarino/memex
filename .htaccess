@@ -1,0 +1,13 @@
+# GZIP files to reduce load times
+<ifmodule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
+</ifmodule>
+
+# Disable automatic directory indexing
+Options -indexes
+
+# Redirects
+RewriteEngine   on
+RewriteRule     ^.+$    index.php   [L]
+
+php_flag magic_quotes_gpc Off
