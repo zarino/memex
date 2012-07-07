@@ -1,8 +1,8 @@
 <?php
 
-require_once 'functions.php';
-require_once 'endpoints.php';
-require_once 'urls.php';
+require 'functions.php';
+require 'endpoints.php';
+require 'urls.php';
 
 foreach($urls as $u){
 	if(preg_match('#'.$u[0].'#', $_SERVER['REQUEST_URI'])){
