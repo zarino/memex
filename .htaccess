@@ -7,7 +7,12 @@ AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css a
 Options -indexes
 
 # Redirects
+<ifmodule mod_rewrite.c>
 RewriteEngine   on
-RewriteRule     ^.+$    index.php   [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !\.php$
+RewriteRule     ^.*$    index.php   [L]
+</ifmodule>
 
 php_flag magic_quotes_gpc Off
