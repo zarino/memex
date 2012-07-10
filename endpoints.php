@@ -30,7 +30,7 @@ function reminder(){
 }
 
 function fourohfour(){
-	header("HTTP/1.0 404 Not Found");
+	header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
 	print 'You requested something we don&rsquo;t have &ndash; 404!<br/><br/>';
 	pretty_print_r($_SERVER);
 }
