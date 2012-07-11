@@ -29,14 +29,16 @@ function items(){
 }
 
 function item(){
+	$args = explode('/', $_SERVER['REQUEST_URI']);
+	$id = $args[2];
 	if($_SERVER['REQUEST_METHOD'] == 'GET'){
-		print 'You requested details for a single item';
+		print 'You requested details for the item id: ' . $id;
 	} else if($_SERVER['REQUEST_METHOD'] == 'POST'){
-		print 'You requested to update the item with the specified ID';
+		print 'You requested to update the item the id: ' . $id;
 	} else if($_SERVER['REQUEST_METHOD'] == 'PUT'){
-		print 'You requested to create an item with the specified ID';
+		print 'You requested to create an item the id: ' . $id;
 	} else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
-		print 'You requested to the delete the item with the specified ID';
+		print 'You requested to the delete the item the id: ' . $id;
 	} else {
 		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
 			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
