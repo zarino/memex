@@ -14,10 +14,10 @@ function items(){
 		if(empty($_SERVER['QUERY_STRING'])){
 			print 'You requested a list of all items';
 		} else {
-			print 'You just tried to search the items';
+			print 'You requested to search the items';
 		}
 	} else if($_SERVER['REQUEST_METHOD'] == 'POST'){
-		print 'You just tried to create a new item';
+		print 'You requested to create a new item';
 	} else {
 		header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
 		print 'This endpoint only accepts GET and POST requests, to list all items and to add a new item, respectively.';
