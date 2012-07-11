@@ -29,7 +29,21 @@ function items(){
 }
 
 function item(){
-	print 'You requested a single item page';
+	if($_SERVER['REQUEST_METHOD'] == 'GET'){
+		print 'You requested details for a single item';
+	} else if($_SERVER['REQUEST_METHOD'] == 'POST'){
+		print 'You requested to update the item with the specified ID';
+	} else if($_SERVER['REQUEST_METHOD'] == 'PUT'){
+		print 'You requested to create an item with the specified ID';
+	} else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
+		print 'You requested to the delete the item with the specified ID';
+	} else {
+		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
+			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
+		}
+		header("Allow: GET, POST, PUT, DELETE");
+		print 'This endpoint only accepts GET, POST, PUT and DELETE requests. Use GET to request details for the item with the specified ID; use POST to update the item with the specified ID; use PUT to create a new item with the specified ID; use DELETE to delete the item with the specified ID.';
+	}
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
