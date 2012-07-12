@@ -10,43 +10,51 @@ function homepage(){
 }
 
 function items(){
-	if($_SERVER['REQUEST_METHOD'] == 'GET'){
+	$methods = array(
+		'GET' => 'list or search items',
+		'POST' => 'create a new item'
+	);
+
+	function GET(){
 		if(empty($_SERVER['QUERY_STRING'])){
 			print 'You requested a list of all items';
 		} else {
 			print 'You requested to search the items';
 		}
-	} else if($_SERVER['REQUEST_METHOD'] == 'POST'){
-		print 'You requested to create a new item';
-	} else {
-		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
-		}
-		header("Allow: GET, POST");
-		print 'This endpoint only accepts GET and POST requests. Use GET to list or search items; use POST to create a new item.';
 	}
-	pretty_print_r('<br/><br/>', $_SERVER);
+	
+	function POST(){
+		print 'You requested to create a new item';
+	}
+	
+	respond_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function item(){
-	$args = explode('/', $_SERVER['REQUEST_URI']);
-	$id = $args[2];
-	if($_SERVER['REQUEST_METHOD'] == 'GET'){
-		print 'You requested details for the item id: ' . $id;
-	} else if($_SERVER['REQUEST_METHOD'] == 'POST'){
-		print 'You requested to update the item the id: ' . $id;
-	} else if($_SERVER['REQUEST_METHOD'] == 'PUT'){
-		print 'You requested to create an item the id: ' . $id;
-	} else if($_SERVER['REQUEST_METHOD'] == 'DELETE'){
-		print 'You requested to the delete the item the id: ' . $id;
-	} else {
-		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
-		}
-		header("Allow: GET, POST, PUT, DELETE");
-		print 'This endpoint only accepts GET, POST, PUT and DELETE requests. Use GET to request details for the item with the specified ID; use POST to update the item with the specified ID; use PUT to create a new item with the specified ID; use DELETE to delete the item with the specified ID.';
+	$methods = array(
+		'GET' => 'request details for the item with the specified ID',
+		'POST' => 'update the item with the specified ID',
+		'PUT' => 'create an item with the specified ID',
+		'DELETE' => 'delete the item with the specified ID'
+	);
+
+	function GET(){
+		print 'You requested details for the item id: ' . uri_part(1);
 	}
-	pretty_print_r('<br/><br/>', $_SERVER);
+	
+	function POST(){
+		print 'You requested to update the item the id: ' . uri_part(1);
+	}
+	
+	function PUT(){
+		print 'You requested to create an item the id: ' . uri_part(1);
+	}
+	
+	function DELETE(){
+		print 'You requested to the delete the item the id: ' . uri_part(1);
+	}
+	
+	respond_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function reminders(){
