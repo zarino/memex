@@ -12,15 +12,23 @@ function handle_put_delete(){
 }
 
 function parse_request(){
+	# set default response formats
 	if($_SERVER['REQUEST_URI'] == '/'){
 		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
 	} else {
 		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-		if(ends_with($_SERVER['REQUEST_URI'], '.json')){
-			$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-		} else if(ends_with($_SERVER['REQUEST_URI'], '.html')){
-			$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
-		}
+	}
+	# use JSON or HTML format if specified in REQUEST_URI
+	if(ends_with($_SERVER['REQUEST_URI'], '.json')){
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
+	} else if(ends_with($_SERVER['REQUEST_URI'], '.html')){
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
+	}
+	# allow override using HTTP headers
+	if((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT']=='application/json') || (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE']=='application/json')){
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
+	} else if((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT']=='text/html') || (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE']=='text/html')){
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
 	}
 }
 
