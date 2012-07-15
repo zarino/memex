@@ -1,5 +1,8 @@
 <?php
 
+define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+// define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyz');
+
 $GLOBALS['_PUT'] = array();
 $GLOBALS['_DELETE'] = array();
 
@@ -84,6 +87,29 @@ function uri_part($index){
 	} else {
 		trigger_error("Cannot return part #" . $index . ': REQUEST_URI "' . $_SERVER['REQUEST_URI'] . '" only has ' . count($parts) . ' part' . pluralise(count($parts)), E_USER_ERROR);
 	}
+}
+
+# Turns an integer into an alphanumeric hash (eg: 123456 -> '2n9c')
+function integer_to_hash($integer, $base = ALLOWED_CHARS){
+    $length = strlen($base);
+    $out = '';
+    while($integer > $length - 1){
+        $out = $base[fmod($integer, $length)] . $out;
+        $integer = floor( $integer / $length );
+    }
+    return $base[$integer] . $out;
+}
+
+# Turns an alphanumeric hash into an integer (eg: '2n9c' -> 123456)
+function hash_to_integer($string, $base = ALLOWED_CHARS){
+    $length = strlen($base);
+    $size = strlen($string) - 1;
+    $string = str_split($string);
+    $out = strpos($base, array_pop($string));
+    foreach($string as $i => $char){
+        $out += strpos($base, $char) * pow($length, $size - $i);
+    }
+    return $out;
 }
 
 ?>
