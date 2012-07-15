@@ -1,17 +1,27 @@
 <?php
 
-define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-// define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyz');
+function handle_put_delete(){
+	$GLOBALS['_PUT'] = $GLOBALS['_DELETE'] = array();
+	if($_SERVER['REQUEST_METHOD'] == 'PUT') {
+		parse_str(file_get_contents("php://input"),$post_vars);
+		$GLOBALS['_PUT'] = $post_vars;
+	} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+		parse_str(file_get_contents("php://input"),$post_vars);
+		$GLOBALS['_DELETE'] = $post_vars;
+	}
+}
 
-$GLOBALS['_PUT'] = array();
-$GLOBALS['_DELETE'] = array();
-
-if($_SERVER['REQUEST_METHOD'] == 'PUT') {
-	parse_str(file_get_contents("php://input"),$post_vars);
-	$GLOBALS['_PUT'] = $post_vars;
-} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
-	parse_str(file_get_contents("php://input"),$post_vars);
-	$GLOBALS['_DELETE'] = $post_vars;
+function parse_request(){
+	if($_SERVER['REQUEST_URI'] == '/'){
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
+	} else {
+		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
+		if(ends_with($_SERVER['REQUEST_URI'], '.json')){
+			$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
+		} else if(ends_with($_SERVER['REQUEST_URI'], '.html')){
+			$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
+		}
+	}
 }
 
 function pretty_print_r($arg1, $arg2='', $suffix=''){
@@ -44,6 +54,18 @@ function pluralise($number, $plural_suffix='s', $singular_suffix=''){
 	} else {
 		trigger_error("pluralise() was passed a non-integer, non-float argument", E_USER_ERROR);
 	}
+}
+
+function begins_with($haystack, $needle){
+    return (strpos($haystack, $needle) === 0 ? True : False);
+}
+
+function ends_with($haystack, $needle){
+    return (strpos($haystack, $needle) === strlen($haystack)-strlen($needle) ? True : False);
+}
+
+function contains($haystack, $needle){
+    return (strpos($haystack, $needle) ? True : False);
 }
 
 # Turns an array into a list like: "First, second and third"
@@ -81,7 +103,7 @@ function respond_to_method($method, $methods){
 }
 
 function uri_part($index){
-	$parts = array_values(array_filter(explode('/', $_SERVER['REQUEST_URI'])));
+	$parts = array_values(array_filter(explode('/', preg_replace('#(\.json|\.html)$#', '', $_SERVER['REQUEST_URI']))));
 	if($index < count($parts)){
 		return $parts[$index];
 	} else {
