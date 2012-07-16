@@ -142,4 +142,10 @@ function hash_to_integer($string, $base = ALLOWED_CHARS){
     return $out;
 }
 
+function mysqli_setup(){
+	$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
+	mysqli_set_charset($dbc, 'utf8');
+	mysqli_query($dbc, 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
+}
+
 ?>
