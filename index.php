@@ -7,7 +7,8 @@ require 'urls.php';
 
 handle_put_delete();
 parse_request();
-mysqli_setup();
+connect_to_database();
+# setup_database();
 
 foreach($urls as $u){
 	if(preg_match('#'.$u[0].'#', $_SERVER['REQUEST_URI'])){

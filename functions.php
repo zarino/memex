@@ -87,9 +87,14 @@ function integer_to_hash($integer, $base = ALLOWED_CHARS){
     return $base[$integer] . $out;
 }
 
-function mysqli_setup(){
+
+function connect_to_database(){
+	global $dbc;
 	$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
 	mysqli_set_charset($dbc, 'utf8');
+}
+
+function setup_database(){
 	mysqli_query($dbc, 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
 	mysqli_query($dbc, 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
 }
