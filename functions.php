@@ -43,7 +43,7 @@ function parse_request(){
 	}
 }
 
-function respond_to_method($method, $methods){
+function route_to_method($method, $methods){
 	if(in_array($method, array_keys($methods))){
 		header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
 		$method();

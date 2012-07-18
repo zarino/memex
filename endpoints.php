@@ -27,7 +27,7 @@ function items(){
 		print 'You requested to create a new item';
 	}
 	
-	respond_to_method($_SERVER['REQUEST_METHOD'], $methods);
+	route_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function item(){
@@ -54,7 +54,7 @@ function item(){
 		print 'You requested to the delete the item the id: ' . uri_part(1);
 	}
 	
-	respond_to_method($_SERVER['REQUEST_METHOD'], $methods);
+	route_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function reminders(){
