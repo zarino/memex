@@ -25,6 +25,15 @@ function items(){
 	
 	function POST(){
 		print 'You requested to create a new item';
+		$r = mysqli_query($GLOBALS['dbc'], 'SELECT NOW() as time');
+		if (mysqli_error($GLOBALS['dbc'])) {
+			pretty_print_r(array('error','info'=>'MySQL error: ' . mysqli_error($GLOBALS['dbc']), 'query'=>$q, 'file'=>__FILE__, 'line'=>__LINE__));
+		} else if(mysqli_num_rows($r) == 0) {
+			print 'No rows returned';
+		} else {
+			$row = mysqli_fetch_array($r, MYSQLI_ASSOC);
+			print "\n<br/>\n<br/>\nit is now " . $row['time'];
+		}
 	}
 	
 	route_to_method($_SERVER['REQUEST_METHOD'], $methods);
