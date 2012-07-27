@@ -13,15 +13,6 @@ function handle_put_delete(){
 	}
 }
 
-# A sort of fake endpoint function to show HTTP Request options
-function OPTIONS($methods){
-	print 'This endpoint accepts ' . human_list(array_keys($methods)) . ' requests:';
-	foreach($methods as $method => $description){
-		print ' Use ' . $method . ' to ' . $description . ';';
-	}
-	print ' Or use OPTIONS to see these options again.';
-}
-
 function parse_request(){
 	# set default response formats
 	if($_SERVER['REQUEST_URI'] == '/'){
@@ -43,29 +34,32 @@ function parse_request(){
 	}
 }
 
-function route_to_method($method, $methods){
-	if(in_array($method, array_keys($methods))){
+function handle($methods){
+	if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
 		header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
-		$method();
+		$methods[$_SERVER['REQUEST_METHOD']]['handler']();
 	} else {
-		unexpected_method($methods);
+		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
+			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
+		}
+		header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
+		OPTIONS($methods);
 	}
-	pretty_print_r("\n<br/>\n<br/>\n", $_SERVER);
 }
 
-# Called when an unsupported Request Method is used
-function unexpected_method($methods){
-	if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-		header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
+# A sort of fake endpoint function to show HTTP Request options
+function OPTIONS($methods){
+	print 'This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests:';
+	foreach($methods as $method => $array){
+		print ' Use ' . $method . ' to ' . $array['description'] . ';';
 	}
-	header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
-	OPTIONS($methods);
+	print " Or use OPTIONS to see these options again.\n";
 }
 
 /* UTILITY FUNCTIONS */
 
 # Turns an alphanumeric hash into an integer (eg: '2n9c' -> 123456)
-function hash_to_integer($string, $base = ALLOWED_CHARS){
+function hash_to_integer($string, $base = HASH_CHARS){
     $length = strlen($base);
     $size = strlen($string) - 1;
     $string = str_split($string);
@@ -77,7 +71,7 @@ function hash_to_integer($string, $base = ALLOWED_CHARS){
 }
 
 # Turns an integer into an alphanumeric hash (eg: 123456 -> '2n9c')
-function integer_to_hash($integer, $base = ALLOWED_CHARS){
+function integer_to_hash($integer, $base = HASH_CHARS){
     $length = strlen($base);
     $out = '';
     while($integer > $length - 1){
@@ -122,9 +116,9 @@ function ends_with($haystack, $needle){
 }
 
 # Turns an array into a list like: "First, second and third"
-function human_list($items){
+function human_list($items, $separator='and'){
 	$last = array_pop($items);
-	return implode(', ', $items) . ' and ' . $last;
+	return implode(', ', $items) . ' $separator ' . $last;
 }
 
 function pluralise($number, $plural_suffix='s', $singular_suffix=''){
