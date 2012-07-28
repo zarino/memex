@@ -49,7 +49,7 @@ function handle($methods){
 
 function new_response_object(){
 	return array('request' => array(
-		'REDIRECT_STATUS' => $_SERVER['REDIRECT_STATUS'],
+		'HTTP_STATUS' => (isset($_SERVER['REDIRECT_STATUS']) ? $_SERVER['REDIRECT_STATUS'] : 200),
 		'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
 		'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
 		'REQUEST_URI' => $_SERVER['REQUEST_URI'],

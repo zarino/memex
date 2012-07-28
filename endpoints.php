@@ -5,8 +5,9 @@
 //	These are called by index.php, and found via urls.php
 
 function homepage(){
-	print 'You requested the homepage';
-	pretty_print_r($_SERVER);
+	$resp = new_response_object();
+	$resp['responses'][] = 'You requested the homepage';
+	send_response($resp);
 }
 
 function items(){
