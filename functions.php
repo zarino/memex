@@ -47,6 +47,18 @@ function handle($methods){
 	}
 }
 
+function new_response_object(){
+	return array('request' => array(
+		'REDIRECT_STATUS' => $_SERVER['REDIRECT_STATUS'],
+		'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+		'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
+		'REQUEST_URI' => $_SERVER['REQUEST_URI'],
+		'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
+		'REQUEST_TIME' => $_SERVER['REQUEST_TIME'],
+		'RESPONSE_FORMAT' => $_SERVER['RESPONSE_FORMAT']
+	), 'responses' => array(), 'data' => array());
+}
+
 # A sort of fake endpoint function to show HTTP Request options
 function OPTIONS($methods){
 	print 'This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests:';
@@ -54,6 +66,19 @@ function OPTIONS($methods){
 		print ' Use ' . $method . ' to ' . $array['description'] . ';';
 	}
 	print " Or use OPTIONS to see these options again.\n";
+}
+
+function send_response($response_object){
+	if($_SERVER['RESPONSE_FORMAT']=='json'){
+		header('Content-Type: application/json');
+		print json_encode($response_object);
+	} else if($_SERVER['RESPONSE_FORMAT']=='html'){
+		header('Content-Type: text/html');
+		pretty_print_r($response_object, "\n");
+	} else {
+		header('Content-Type: text/html');
+		throw new Exception('Could not print response object to requested format: ' . $_SERVER['RESPONSE_FORMAT']);
+	}
 }
 
 /* UTILITY FUNCTIONS */

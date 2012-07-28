@@ -15,25 +15,37 @@ function items(){
 			'description' => 'list or search items',
 			'handler' => function(){
 				if(empty($_SERVER['QUERY_STRING'])){
-					print "You requested a list of all items\n";
+					$resp = new_response_object();
+					$resp['responses'][] = "You requested a list of all items";
 				} else {
-					print "You requested to search the items\n";
+					$resp = new_response_object();
+					$resp['responses'][] = "You requested to search the items";
 				}
+				send_response($resp);
 			}
 		),
 		'POST' => array(
 			'description' => 'create a new item',
 			'handler' => function(){
-				print "You requested to create a new item\n";
-				$r = mysqli_query($GLOBALS['dbc'], 'SELECT NOW() as time');
+				$resp = new_response_object();
+				$resp['responses'][] = "You requested to create a new item";
+				$q = 'SELECT NOW() as time';
+				$r = mysqli_query($GLOBALS['dbc'], $q);
 				if (mysqli_error($GLOBALS['dbc'])) {
-					pretty_print_r(array('error','info'=>'MySQL error: ' . mysqli_error($GLOBALS['dbc']), 'query'=>$q, 'file'=>__FILE__, 'line'=>__LINE__));
+					$resp['responses'][] = "Oh dear! There was a MySQL error";
+					$resp['errors'] = array(array(
+						'error'=>'MySQL error: ' . mysqli_error($GLOBALS['dbc']),
+						'query'=> $q,
+						'file'=> __FILE__,
+						'line'=> __LINE__ - 7)
+					);
 				} else if(mysqli_num_rows($r) == 0) {
-					print "No rows returned\n";
+					$resp['reponses'][] = "No rows returned";
 				} else {
 					$row = mysqli_fetch_array($r, MYSQLI_ASSOC);
-					print "It is now " . $row['time'] . "\n";
+					$resp['data'][] = array('current_time' => $row['time']);
 				}
+				send_response($resp);
 			}
 		)
 	);
