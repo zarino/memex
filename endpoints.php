@@ -74,28 +74,28 @@ function item(){
 }
 
 function reminders(){
-	print 'You requested the reminders page';
+	print "You requested the reminders page\n";
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
 function reminder(){
-	print 'You requested a single reminder page';
+	print "You requested a single reminder page\n";
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
 function updates(){
-	print 'You requested the updates page';
+	print "You requested the updates page\n";
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
 function settings(){
-	print 'You requested the settings page';
+	print "You requested the settings page\n";
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
 function fourohfour(){
 	header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
-	print 'You requested something we don&rsquo;t have &ndash; 404!';
+	print "You requested something we don&rsquo;t have &ndash; 404!\n";
 	pretty_print_r('<br/><br/>', $_SERVER);
 }
 
