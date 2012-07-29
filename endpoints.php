@@ -5,9 +5,9 @@
 //	These are called by index.php, and found via urls.php
 
 function homepage(){
-	$resp = new_response_object();
-	$resp['responses'][] = 'You requested the homepage';
-	send_response($resp);
+	global $resp;
+	$resp->add_response('You requested the homepage');
+	$resp->send();
 }
 
 function items(){
@@ -15,44 +15,41 @@ function items(){
 		'GET' => array(
 			'description' => 'list or search items',
 			'handler' => function(){
+				global $resp;
 				if(empty($_SERVER['QUERY_STRING'])){
-					$resp = new_response_object();
-					$resp['responses'][] = "You requested a list of all items";
+					$resp->add_response("You requested a list of all items");
 				} else {
-					$resp = new_response_object();
-					$resp['responses'][] = "You requested to search the items";
+					$resp->add_response("You requested to search the items");
 				}
-				send_response($resp);
+				$resp->send();
 			}
 		),
 		'POST' => array(
 			'description' => 'create a new item',
 			'handler' => function(){
-				$resp = new_response_object();
-				$resp['responses'][] = "You requested to create a new item";
+				global $resp;
+				$resp->add_response("You requested to create a new item");
 				$q = 'SELECT NOW() as time';
 				$r = mysqli_query($GLOBALS['dbc'], $q);
 				if (mysqli_error($GLOBALS['dbc'])) {
-					$resp['responses'][] = "Oh dear! There was a MySQL error";
-					$resp['errors'] = array(array(
+					$resp->add_response("Oh dear! There was a MySQL error");
+					$resp->set_errors(array(array(
 						'error'=>'MySQL error: ' . mysqli_error($GLOBALS['dbc']),
 						'query'=> $q,
 						'file'=> __FILE__,
 						'line'=> __LINE__ - 7)
-					);
+					));
 				} else if(mysqli_num_rows($r) == 0) {
-					$resp['reponses'][] = "No rows returned";
+					$resp->add_response("No rows returned");
 				} else {
 					$row = mysqli_fetch_array($r, MYSQLI_ASSOC);
-					$resp['data'][] = array('current_time' => $row['time']);
+					$resp->add_data(array('current_time' => $row['time']));
 				}
-				send_response($resp);
+				$resp->send();
 			}
 		)
 	);
-	
 	handle($methods);
-	#route_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function item(){
@@ -60,30 +57,37 @@ function item(){
 		'GET' => array(
 			'description' => 'request details for the item with the specified ID',
 			'handler' => function(){
-				print 'You requested details for the item id: ' . uri_part(1) . "\n";
+				global $resp;
+				$resp->add_response('You requested details for the item id: ' . uri_part(1));
+				$resp->send();
 			}
 		),
 		'POST' => array(
 			'description' => 'update the item with the specified ID',
 			'handler' => function(){
-				print 'You requested to update the item the id: ' . uri_part(1) . "\n";
+				global $resp;
+				$resp->add_response('You requested to update the item the id: ' . uri_part(1));
+				$resp->send();
 			}
 		),
 		'PUT' => array(
 			'description' => 'create an item with the specified ID',
 			'handler' => function(){
-				print 'You requested to create an item the id: ' . uri_part(1) . "\n";
+				global $resp;
+				$resp->add_response('You requested to create an item the id: ' . uri_part(1));
+				$resp->send();
 			}
 		),
 		'DELETE' => array(
 			'description' => 'delete the item with the specified ID',
 			'handler' => function(){
-				print 'You requested to the delete the item the id: ' . uri_part(1) . "\n";
+				global $resp;
+				$resp->add_response('You requested to the delete the item the id: ' . uri_part(1));
+				$resp->send();
 			}
 		)
 	);
 	handle($methods);
-	#route_to_method($_SERVER['REQUEST_METHOD'], $methods);
 }
 
 function reminders(){
@@ -107,9 +111,10 @@ function settings(){
 }
 
 function fourohfour(){
-	header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
-	print "You requested something we don&rsquo;t have &ndash; 404!\n";
-	pretty_print_r('<br/><br/>', $_SERVER);
+	global $resp;
+	$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+	$resp->add_response("You requested something we don't have");
+	$resp->send();
 }
 
 ?>

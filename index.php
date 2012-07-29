@@ -10,6 +10,8 @@ parse_request();
 connect_to_database();
 # setup_database();
 
+$resp = new Response();
+
 foreach($urls as $u){
 	if(preg_match('#'.$u[0].'#', $_SERVER['REQUEST_URI'])){
 		$u[1]();

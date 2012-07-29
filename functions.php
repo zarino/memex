@@ -35,49 +35,76 @@ function parse_request(){
 }
 
 function handle($methods){
+	global $resp;
 	if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
-		header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
+		$resp->add_header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
 		$methods[$_SERVER['REQUEST_METHOD']]['handler']();
 	} else {
 		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-			header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
+			$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
 		}
-		header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
-		OPTIONS($methods);
+		$resp->add_header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
+		$resp->set_options($methods);
+		$resp->send();
 	}
 }
 
-function new_response_object(){
-	return array('request' => array(
-		'HTTP_STATUS' => (isset($_SERVER['REDIRECT_STATUS']) ? $_SERVER['REDIRECT_STATUS'] : 200),
-		'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
-		'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
-		'REQUEST_URI' => $_SERVER['REQUEST_URI'],
-		'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
-		'REQUEST_TIME' => $_SERVER['REQUEST_TIME'],
-		'RESPONSE_FORMAT' => $_SERVER['RESPONSE_FORMAT']
-	), 'responses' => array(), 'data' => array());
-}
+class Response {
 
-# A sort of fake endpoint function to show HTTP Request options
-function OPTIONS($methods){
-	print 'This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests:';
-	foreach($methods as $method => $array){
-		print ' Use ' . $method . ' to ' . $array['description'] . ';';
+	public $response;
+
+	public function __construct() {
+		$this->response = array('request' => array(
+			'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+			'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
+			'REQUEST_URI' => $_SERVER['REQUEST_URI'],
+			'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
+			'REQUEST_TIME' => $_SERVER['REQUEST_TIME'],
+			'RESPONSE_FORMAT' => $_SERVER['RESPONSE_FORMAT']
+		), 'responses' => array(), 'data' => array());
+		$this->headers = array();
 	}
-	print " Or use OPTIONS to see these options again.\n";
-}
 
-function send_response($response_object){
-	if($_SERVER['RESPONSE_FORMAT']=='json'){
-		header('Content-Type: application/json');
-		print json_encode($response_object);
-	} else if($_SERVER['RESPONSE_FORMAT']=='html'){
-		header('Content-Type: text/html');
-		pretty_print_r($response_object, "\n");
-	} else {
-		header('Content-Type: text/html');
-		throw new Exception('Could not print response object to requested format: ' . $_SERVER['RESPONSE_FORMAT']);
+	public function add_data($data){
+		$this->response['data'][] = $data;
+	}
+
+	public function add_header($header){
+		$this->headers[] = $header;
+	}
+
+	public function add_response($message){
+		$this->response['responses'][] = $message;
+	}
+
+	public function set_errors($errors){
+		$this->response['errors'] = $errors;
+	}
+
+	public function set_options($methods){
+		$a = array();
+		foreach($methods as $method => $properties){
+			$a[$method] = $properties['description'];
+		}
+		$a['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
+		$this->response['options'] = $a;
+		$this->add_response('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
+	}
+
+	public function send(){
+		if($_SERVER['RESPONSE_FORMAT']=='json'){
+			$this->add_header('Content-Type: application/json');
+			foreach($this->headers as $h){ header($h); }
+			print pretty_json(json_encode($this->response)) . "\n";
+		} else if($_SERVER['RESPONSE_FORMAT']=='html'){
+			$this->add_header('Content-Type: text/html');
+			foreach($this->headers as $h){ header($h); }
+			pretty_print_r($this->response, "\n");
+		} else {
+			$this->add_header('Content-Type: text/html');
+			foreach($this->headers as $h){ header($h); }
+			throw new Exception('Could not print response object to requested format: ' . $_SERVER['RESPONSE_FORMAT']);
+		}
 	}
 }
 
@@ -122,7 +149,7 @@ function uri_part($index){
 	if($index < count($parts)){
 		return $parts[$index];
 	} else {
-		trigger_error("Cannot return part #" . $index . ': REQUEST_URI "' . $_SERVER['REQUEST_URI'] . '" only has ' . count($parts) . ' part' . pluralise(count($parts)), E_USER_ERROR);
+		throw new Exception("Cannot return part #" . $index . ': REQUEST_URI "' . $_SERVER['REQUEST_URI'] . '" only has ' . count($parts) . ' part' . pluralise(count($parts)));
 	}
 }
 
@@ -154,8 +181,44 @@ function pluralise($number, $plural_suffix='s', $singular_suffix=''){
 			return $plural_suffix;
 		}
 	} else {
-		trigger_error("pluralise() was passed a non-integer, non-float argument", E_USER_ERROR);
+		throw new Exception("pluralise() was passed a non-integer, non-float argument");
 	}
+}
+
+# Returns a pretty json string with whitespace and linebreaks
+# http://snipplr.com/view/60559/prettyjson/
+function pretty_json($json) {
+    $result = '';
+    $pos = 0;
+    $strLen = strlen($json);
+    $indentStr = '  ';
+    $newLine = "\n";
+    $prevChar = '';
+    $outOfQuotes = true;
+    for ($i=0; $i<=$strLen; $i++) {
+        $char = substr($json, $i, 1);
+        if ($char == '"' && $prevChar != '\\') {
+            $outOfQuotes = !$outOfQuotes;
+        } else if(($char == '}' || $char == ']') && $outOfQuotes) {
+            $result .= $newLine;
+            $pos --;
+            for ($j=0; $j<$pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        $result .= $char;
+        if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+            $result .= $newLine;
+            if ($char == '{' || $char == '[') {
+                $pos ++;
+            }
+            for ($j = 0; $j < $pos; $j++) {
+                $result .= $indentStr;
+            }
+        }
+        $prevChar = $char;
+    }
+    return $result;
 }
 
 function pretty_print_r($arg1, $arg2='', $suffix=''){
@@ -174,7 +237,7 @@ function pretty_print_r($arg1, $arg2='', $suffix=''){
 		print_r($array);
 		print '</pre>' . $suffix;
 	} else {
-	    trigger_error("Incorrect parameters supplied to pretty_print_r() - function takes an optional string prefix, a required array, and an optional string suffix", E_USER_ERROR);
+	    throw new Exception("Incorrect parameters supplied to pretty_print_r() - function takes an optional string prefix, a required array, and an optional string suffix");
 	}
 }
 
