@@ -33,12 +33,7 @@ function items(){
 				$r = mysqli_query($GLOBALS['dbc'], $q);
 				if (mysqli_error($GLOBALS['dbc'])) {
 					$resp->add_response("Oh dear! There was a MySQL error");
-					$resp->set_errors(array(array(
-						'error'=>'MySQL error: ' . mysqli_error($GLOBALS['dbc']),
-						'query'=> $q,
-						'file'=> __FILE__,
-						'line'=> __LINE__ - 7)
-					));
+					$resp->add_error('MySQL error', mysqli_error($GLOBALS['dbc']), $q, __FILE__, __LINE__ - 7);
 				} else if(mysqli_num_rows($r) == 0) {
 					$resp->add_response("No rows returned");
 				} else {

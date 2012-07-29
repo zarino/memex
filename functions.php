@@ -68,6 +68,19 @@ class Response {
 	public function add_data($data){
 		$this->response['data'][] = $data;
 	}
+	
+	public function add_error($type, $error, $input, $file, $line){
+		if(!isset($this->response['errors'])){
+			$this->response['errors'] = array();
+		}
+		$this->response['errors'][] = array(
+			'type' => $type,
+			'error' => $error,
+			'query' => $input,
+			'file' => $file,
+			'line' => $line
+		);
+	}
 
 	public function add_header($header){
 		$this->headers[] = $header;
@@ -75,10 +88,6 @@ class Response {
 
 	public function add_response($message){
 		$this->response['responses'][] = $message;
-	}
-
-	public function set_errors($errors){
-		$this->response['errors'] = $errors;
 	}
 
 	public function set_options($methods){
@@ -108,6 +117,28 @@ class Response {
 	}
 }
 
+/* DATABASE FUNCTIONS */
+
+function connect_to_database(){
+	$GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
+	mysqli_set_charset($GLOBALS['dbc'], 'utf8');
+}
+
+function db_safe($v, $s="'"){
+	if(is_null($v)){
+		return 'NULL';
+	} else if(is_string($v) || is_int($v) || is_float($v) || is_numeric($v)) {
+		return $s . mysqli_real_escape_string($GLOBALS['dbc'], $v) . $s;
+	} else {
+		throw new Exception("db_safe() can't handle arguments of type " . gettype($v));
+	}
+}
+
+function setup_database(){
+	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
+	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
+}
+
 /* UTILITY FUNCTIONS */
 
 # Turns an alphanumeric hash into an integer (eg: '2n9c' -> 123456)
@@ -131,17 +162,6 @@ function integer_to_hash($integer, $base = HASH_CHARS){
         $integer = floor( $integer / $length );
     }
     return $base[$integer] . $out;
-}
-
-
-function connect_to_database(){
-	$GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
-	mysqli_set_charset($GLOBALS['dbc'], 'utf8');
-}
-
-function setup_database(){
-	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
-	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
 }
 
 function uri_part($index){
