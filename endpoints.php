@@ -28,17 +28,17 @@ function items(){
 			'description' => 'create a new item',
 			'handler' => function(){
 				global $resp;
-				$resp->add_response("You requested to create a new item");
-				$q = 'SELECT NOW() as time';
-				$r = mysqli_query($GLOBALS['dbc'], $q);
-				if (mysqli_error($GLOBALS['dbc'])) {
-					$resp->add_response("Oh dear! There was a MySQL error");
-					$resp->add_error('MySQL error', mysqli_error($GLOBALS['dbc']), $q, __FILE__, __LINE__ - 7);
-				} else if(mysqli_num_rows($r) == 0) {
-					$resp->add_response("No rows returned");
+				$title = (isset($_POST['title']) ? $_POST['title'] : Null);
+				$content = (isset($_POST['content']) ? $_POST['content'] : Null);
+				$source = (isset($_POST['source']) ? $_POST['source'] : Null);
+				$url = (isset($_POST['url']) ? $_POST['url'] : Null);
+				$r = add_item($title, $content, $source, $url);
+				if($r['success']){
+					$resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
+					$resp->add_data(array('id'=>$r['insert_id']));
 				} else {
-					$row = mysqli_fetch_array($r, MYSQLI_ASSOC);
-					$resp->add_data(array('current_time' => $row['time']));
+					$resp->add_response("New item could not be added");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
 				}
 				$resp->send();
 			}

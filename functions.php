@@ -119,6 +119,16 @@ class Response {
 
 /* DATABASE FUNCTIONS */
 
+function add_item($title=Null, $content=Null, $source=Null, $url=Null){
+	$q = "INSERT INTO `items` (title, content, source, url, added) VALUES (" . db_safe($title) . "," . db_safe($content) . "," . db_safe($source) . "," . db_safe($url) . ",NOW())";
+	$r = mysqli_query($GLOBALS['dbc'], $q);
+	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
+	} else {
+		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'insert_id'=>mysqli_insert_id($GLOBALS['dbc']));
+	}
+}
+
 function connect_to_database(){
 	$GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
 	mysqli_set_charset($GLOBALS['dbc'], 'utf8');
