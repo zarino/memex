@@ -29,7 +29,7 @@ function items(){
 						foreach($r['results'] as $item){
 							$resp->add_data($item);
 						}
-					} else {	
+					} else {
 						$resp->add_response('No items returned by query');
 					}
 				} else {
