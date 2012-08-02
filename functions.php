@@ -21,9 +21,9 @@ function parse_request(){
 		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
 	}
 	# use JSON or HTML format if specified in REQUEST_URI
-	if(ends_with($_SERVER['REQUEST_URI'], '.json')){
+	if(ends_with(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '.json')){
 		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-	} else if(ends_with($_SERVER['REQUEST_URI'], '.html')){
+	} else if(ends_with(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '.html')){
 		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
 	}
 	# allow override using HTTP headers
@@ -141,6 +141,22 @@ function db_safe($v, $s="'"){
 		return $s . mysqli_real_escape_string($GLOBALS['dbc'], $v) . $s;
 	} else {
 		throw new Exception("db_safe() can't handle arguments of type " . gettype($v));
+	}
+}
+
+function get_items($order){
+	$q = "SELECT * FROM `items` ORDER BY " . mysqli_real_escape_string($GLOBALS['dbc'], $order);
+	$r = mysqli_query($GLOBALS['dbc'], $q);
+	if (mysqli_error($GLOBALS['dbc'])) {
+		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
+	} else if(mysqli_num_rows($r) == 0) {
+		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>array());
+	} else {
+		$results = array();
+		while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)){
+			$results[] = $row;
+		}
+		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>$results);
 	}
 }
 

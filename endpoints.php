@@ -16,10 +16,25 @@ function items(){
 			'description' => 'list or search items',
 			'handler' => function(){
 				global $resp;
-				if(empty($_SERVER['QUERY_STRING'])){
-					$resp->add_response("You requested a list of all items");
+				if($_GET['order']){
+					$order = $_GET['order'];
 				} else {
-					$resp->add_response("You requested to search the items");
+					$order = 'updated DESC, added DESC';
+				}
+				$r = get_items($order);
+				if($r['success']){
+					if($r['results']){
+						$c = count($r['results']);
+						$resp->add_response($c . ' item' . pluralise($c) . ' in databse');
+						foreach($r['results'] as $item){
+							$resp->add_data($item);
+						}
+					} else {	
+						$resp->add_response('No items returned by query');
+					}
+				} else {
+					$resp->add_response("Could not query items database");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
 				}
 				$resp->send();
 			}
