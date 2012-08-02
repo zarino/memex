@@ -8,10 +8,10 @@
 
 $urls = array(
 	'homepage' => array('^/$','homepage'),
-	'items' => array('^/items(/(\?.+)?|\.html|\.json)?$','items'),
-	'item' => array('^/items/[a-zA-Z0-9]+(/|\.html|\.json)?$','item'),
-	'reminders' => array('^/reminders(/(\?.+)?|\.html|\.json)?$','reminders'),
-	'reminder' => array('^/reminder/[a-zA-Z0-9]+(/|\.html|\.json)?$','reminder'),
+	'items' => array('^/items(/|\.html|\.json)?(\?.+)?$','items'),
+	'item' => array('^/items/[a-zA-Z0-9]+(/|\.html|\.json)?(\?.+)?$','item'),
+	'reminders' => array('^/reminders(/|\.html|\.json)?(\?.+)?$','reminders'),
+	'reminder' => array('^/reminder/[a-zA-Z0-9]+(/|\.html|\.json)?(\?.+)?$','reminder'),
 	'fourohfour' => array('.','fourohfour')
 );
 
