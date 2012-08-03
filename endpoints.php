@@ -16,7 +16,7 @@ function items(){
 			'description' => 'list or search items',
 			'handler' => function(){
 				global $resp;
-				if($_GET['order']){
+				if(isset($_GET['order'])){
 					$order = $_GET['order'];
 				} else {
 					$order = 'updated DESC, added DESC';
