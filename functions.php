@@ -144,8 +144,18 @@ function db_safe($v, $s="'"){
 	}
 }
 
+function delete_item($id){
+	$q = "UPDATE `items` SET `deleted`=NOW() WHERE id=" . db_safe($id) . " LIMIT 1";
+	$r = mysqli_query($GLOBALS['dbc'], $q);
+	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']));
+	} else {
+		return array('success'=>True, 'query'=>$q, 'error'=>Null);
+	}
+}
+
 function get_items($order){
-	$q = "SELECT * FROM `items` ORDER BY " . mysqli_real_escape_string($GLOBALS['dbc'], $order);
+	$q = "SELECT * FROM `items` WHERE `deleted` IS NULL ORDER BY " . mysqli_real_escape_string($GLOBALS['dbc'], $order);
 	$r = mysqli_query($GLOBALS['dbc'], $q);
 	if (mysqli_error($GLOBALS['dbc'])) {
 		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);

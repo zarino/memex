@@ -34,7 +34,7 @@ function items(){
 					}
 				} else {
 					$resp->add_response("Could not query items database");
-					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
 				}
 				$resp->send();
 			}
@@ -93,6 +93,14 @@ function item(){
 			'handler' => function(){
 				global $resp;
 				$resp->add_response('You requested to the delete the item the id: ' . uri_part(1));
+				$r = delete_item(uri_part(1));
+				if($r['success']){
+					$resp->add_response("Item " . uri_part(1) . " deleted");
+				} else {
+					$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+					$resp->add_response("Item " . uri_part(1) . " could not be deleted");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 6);
+				}
 				$resp->send();
 			}
 		)
