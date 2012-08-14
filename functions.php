@@ -138,7 +138,7 @@ function db_safe($v, $s="'"){
 	if(is_null($v)){
 		return 'NULL';
 	} else if(is_string($v) || is_int($v) || is_float($v) || is_numeric($v)) {
-		return $s . mysqli_real_escape_string($GLOBALS['dbc'], $v) . $s;
+		return $s . mysqli_real_escape_string($GLOBALS['dbc'], (string) $v) . $s;
 	} else {
 		throw new Exception("db_safe() can't handle arguments of type " . gettype($v));
 	}
@@ -154,8 +154,12 @@ function delete_item($id){
 	}
 }
 
-function get_items($order){
-	$q = "SELECT * FROM `items` WHERE `deleted` IS NULL ORDER BY " . mysqli_real_escape_string($GLOBALS['dbc'], $order);
+function get_items($args){
+	// $args is an array of arguments, such as 'id', 'limit', 'order' and 'search'
+	$q = "SELECT * FROM `items` WHERE `deleted` IS NULL";
+	if(isset($args['id'])){ $q = $q . " AND id=" . db_safe($args['id']); }
+	if(isset($args['order'])){ $q = $q . " ORDER BY " . db_safe($args['order'], ''); }
+	if(isset($args['limit'])){ $q = $q . " LIMIT " . db_safe($args['limit'], ''); }
 	$r = mysqli_query($GLOBALS['dbc'], $q);
 	if (mysqli_error($GLOBALS['dbc'])) {
 		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);

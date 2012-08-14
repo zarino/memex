@@ -21,11 +21,11 @@ function items(){
 				} else {
 					$order = 'updated DESC, added DESC';
 				}
-				$r = get_items($order);
+				$r = get_items(array('order'=>$order));
 				if($r['success']){
 					if($r['results']){
 						$c = count($r['results']);
-						$resp->add_response($c . ' item' . pluralise($c) . ' in databse');
+						$resp->add_response($c . ' item' . pluralise($c) . ' in database');
 						foreach($r['results'] as $item){
 							$resp->add_data($item);
 						}
@@ -68,7 +68,21 @@ function item(){
 			'description' => 'request details for the item with the specified ID',
 			'handler' => function(){
 				global $resp;
-				$resp->add_response('You requested details for the item id: ' . uri_part(1));
+				$r = get_items(array('id'=>uri_part(1)));
+				if($r['success']){
+					if($r['results']){
+						$c = count($r['results']);
+						$resp->add_response($c . ' matching item' . pluralise($c));
+						foreach($r['results'] as $item){
+							$resp->add_data($item);
+						}
+					} else {
+						$resp->add_response('No items returned by query');
+					}
+				} else {
+					$resp->add_response("Could not query items database");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
+				}
 				$resp->send();
 			}
 		),
