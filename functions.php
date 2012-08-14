@@ -183,6 +183,23 @@ function setup_database(){
 	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
 }
 
+function update_item($id, $args){
+	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
+	$a_safe = array_map('db_safe', $args);
+	$a_safe['updated'] = 'NOW()';
+	$update_args = array();
+	foreach($a_safe as $k=>$v){
+		$update_args[] = $k . '=' . $v;
+	}
+	$q = "UPDATE `items` SET " . implode(',', $update_args) . " WHERE id=" . db_safe($id);
+	$r = mysqli_query($GLOBALS['dbc'], $q);
+	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'update_id'=>Null);
+	} else {
+		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'update_id'=>$id);
+	}
+}
+
 /* UTILITY FUNCTIONS */
 
 # Turns an alphanumeric hash into an integer (eg: '2n9c' -> 123456)

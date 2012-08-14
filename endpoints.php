@@ -91,7 +91,19 @@ function item(){
 			'description' => 'update the item with the specified ID',
 			'handler' => function(){
 				global $resp;
-				$resp->add_response('You requested to update the item the id: ' . uri_part(1));
+				$args = array();
+				if(isset($_POST['title'])){ $args['title'] = $_POST['title']; }
+				if(isset($_POST['content'])){ $args['content'] = $_POST['content']; }
+				if(isset($_POST['source'])){ $args['source'] = $_POST['source']; }
+				if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
+				$r = update_item(uri_part(1), $args);
+				if($r['success']){
+					$resp->add_response("Item updated (item id: " . $r['update_id'] . ")");
+					$resp->add_data(array('id'=>$r['update_id']));
+				} else {
+					$resp->add_response("Could not query items database");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
+				}
 				$resp->send();
 			}
 		),
