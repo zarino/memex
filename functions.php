@@ -119,8 +119,12 @@ class Response {
 
 /* DATABASE FUNCTIONS */
 
-function add_item($title=Null, $content=Null, $source=Null, $url=Null){
-	$q = "INSERT INTO `items` (title, content, source, url, added) VALUES (" . db_safe($title) . "," . db_safe($content) . "," . db_safe($source) . "," . db_safe($url) . ",NOW())";
+function add_item($args){
+	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
+	$defaults = array('title'=>Null, 'content'=>Null, 'source'=>Null, 'url'=>Null);
+	$a_safe = array_map('db_safe', array_merge($defaults, $args));
+	$a_safe['added'] = 'NOW()';
+	$q = "INSERT INTO `items` (" . implode(',', array_keys($a_safe)) . ") VALUES (" . implode(',', $a_safe) . ")";
 	$r = mysqli_query($GLOBALS['dbc'], $q);
 	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
 		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);

@@ -43,11 +43,12 @@ function items(){
 			'description' => 'create a new item',
 			'handler' => function(){
 				global $resp;
-				$title = (isset($_POST['title']) ? $_POST['title'] : Null);
-				$content = (isset($_POST['content']) ? $_POST['content'] : Null);
-				$source = (isset($_POST['source']) ? $_POST['source'] : Null);
-				$url = (isset($_POST['url']) ? $_POST['url'] : Null);
-				$r = add_item($title, $content, $source, $url);
+				$args = array();
+				if(isset($_POST['title'])){ $args['title'] = $_POST['title']; }
+				if(isset($_POST['content'])){ $args['content'] = $_POST['content']; }
+				if(isset($_POST['source'])){ $args['source'] = $_POST['source']; }
+				if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
+				$r = add_item($args);
 				if($r['success']){
 					$resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
 					$resp->add_data(array('id'=>$r['insert_id']));
