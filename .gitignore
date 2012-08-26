@@ -1,2 +1,3 @@
 .DS_Store
 config-secret.php
+phpinfo.php
