@@ -37,13 +37,13 @@ function parse_request(){
 function handle($methods){
 	global $resp;
 	if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
-		$resp->add_header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
+		$resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
 		$methods[$_SERVER['REQUEST_METHOD']]['handler']();
 	} else {
 		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-			$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 405 Method Not Allowed");
+			$resp->set_status(405);
 		}
-		$resp->add_header('Allow: ' . implode(', ', array_keys($methods)) . ', OPTIONS');
+		$resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
 		$resp->set_options($methods);
 		$resp->send();
 	}
@@ -62,6 +62,7 @@ class Response {
 			'REQUEST_TIME' => $_SERVER['REQUEST_TIME'],
 			'RESPONSE_FORMAT' => $_SERVER['RESPONSE_FORMAT']
 		), 'responses' => array(), 'data' => array());
+		$this->status_code = 200;
 		$this->headers = array();
 	}
 
@@ -82,8 +83,8 @@ class Response {
 		);
 	}
 
-	public function add_header($header){
-		$this->headers[] = $header;
+	public function add_header($key, $value){
+		$this->headers[$key] = $value;
 	}
 
 	public function add_response($message){
@@ -100,18 +101,29 @@ class Response {
 		$this->add_response('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
 	}
 
+	public function set_status($status_code){
+		global $HTTP_CODES;
+		if(in_array($status_code, array_keys($HTTP_CODES))){
+			$this->status_code = $status_code;
+		} else {
+			throw new Exception($status_code . ' is not a valid HTTP status code');
+		}
+	}
+
 	public function send(){
+		global $HTTP_CODES;
+		header($_SERVER['SERVER_PROTOCOL'] . ' ' . $this->status_code . ' ' . $HTTP_CODES[$this->status_code]);
+		foreach($this->headers as $key=>$value){
+			header($key . ': ' . $value);
+		}
 		if($_SERVER['RESPONSE_FORMAT']=='json'){
-			$this->add_header('Content-Type: application/json');
-			foreach($this->headers as $h){ header($h); }
+			$this->add_header('Content-Type', 'application/json');
 			print pretty_json(json_encode($this->response)) . "\n";
 		} else if($_SERVER['RESPONSE_FORMAT']=='html'){
-			$this->add_header('Content-Type: text/html');
-			foreach($this->headers as $h){ header($h); }
+			$this->add_header('Content-Type', 'text/html');
 			pretty_print_r($this->response, "\n");
 		} else {
-			$this->add_header('Content-Type: text/html');
-			foreach($this->headers as $h){ header($h); }
+			$this->add_header('Content-Type', 'text/html');
 			throw new Exception('Could not print response object to requested format: ' . $_SERVER['RESPONSE_FORMAT']);
 		}
 	}

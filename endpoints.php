@@ -124,7 +124,7 @@ function item(){
 				if($r['success']){
 					$resp->add_response("Item " . uri_part(1) . " deleted");
 				} else {
-					$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+					$resp->set_status(404);
 					$resp->add_response("Item " . uri_part(1) . " could not be deleted");
 					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 6);
 				}
@@ -157,7 +157,7 @@ function settings(){
 
 function fourohfour(){
 	global $resp;
-	$resp->add_header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+	$resp->set_status(404);
 	$resp->add_response("You requested something we don't have");
 	$resp->send();
 }
