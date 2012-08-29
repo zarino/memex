@@ -19,7 +19,7 @@ function items(){
 				if(isset($_GET['order'])){
 					$order = $_GET['order'];
 				} else {
-					$order = 'updated DESC, added DESC';
+					$order = 'COALESCE(updated, added) DESC';
 				}
 				$r = get_items(array('order'=>$order));
 				if($r['success']){
