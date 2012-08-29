@@ -51,6 +51,7 @@ function items(){
 				$r = add_item($args);
 				if($r['success']){
 					$resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
+					$resp->set_status(201);
 					$resp->add_data(array('id'=>$r['insert_id']));
 				} else {
 					$resp->add_response("New item could not be added");
