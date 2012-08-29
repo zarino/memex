@@ -111,8 +111,23 @@ function item(){
 		'PUT' => array(
 			'description' => 'create an item with the specified ID',
 			'handler' => function(){
+				global $_PUT;
 				global $resp;
 				$resp->add_response('You requested to create an item the id: ' . uri_part(1));
+				$args = array('id' => uri_part(1));
+				if(isset($_PUT['title'])){ $args['title'] = $_PUT['title']; }
+				if(isset($_PUT['content'])){ $args['content'] = $_PUT['content']; }
+				if(isset($_PUT['source'])){ $args['source'] = $_PUT['source']; }
+				if(isset($_PUT['url'])){ $args['url'] = $_PUT['url']; }
+				$r = add_item($args);
+				if($r['success']){
+					$resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
+					$resp->set_status(201);
+					$resp->add_data(array('id'=>$r['insert_id']));
+				} else {
+					$resp->add_response("New item could not be added");
+					$resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
+				}
 				$resp->send();
 			}
 		),
