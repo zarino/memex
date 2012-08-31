@@ -19,10 +19,4 @@ foreach($urls as $u){
 	}
 }
 
-// pretty_print_r($_SERVER);
-// pretty_print_r($_GET);
-// pretty_print_r($_POST);
-// pretty_print_r($_PUT);
-// pretty_print_r($_DELETE);
-
 ?>
