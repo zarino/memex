@@ -1,7 +1,7 @@
 <?php
 
 //	This is probably like views or controllers or whatever.
-//	One function per API endpoint.
+//	One function per API endpoint, with child functions for each HTTP method.
 //	These are called by index.php, and found via urls.php
 
 function homepage(){
