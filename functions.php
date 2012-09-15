@@ -148,6 +148,7 @@ function add_item($args){
 function connect_to_database(){
 	$GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
 	mysqli_set_charset($GLOBALS['dbc'], 'utf8');
+	mysqli_query($GLOBALS['dbc'], "SET time_zone='" + get_mysql_timezone_offset() + "';");
 }
 
 function db_safe($v, $s="'"){
@@ -188,6 +189,17 @@ function get_items($args){
 		}
 		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>$results);
 	}
+}
+
+function get_mysql_timezone_offset(){
+	$tz = new DateTimeZone("Europe/London");
+	$dt = new DateTime("now", $tz);
+	$mins = $dt->getOffset() / 60;
+	$sgn = ($mins < 0 ? -1 : 1);
+	$mins = abs($mins);
+	$hrs = floor($mins / 60);
+	$mins -= $hrs * 60;
+	return sprintf('%+d:%02d', $hrs*$sgn, $mins);
 }
 
 function setup_database(){
