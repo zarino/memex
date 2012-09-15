@@ -135,7 +135,7 @@ function add_item($args){
 	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
 	$defaults = array('title'=>Null, 'content'=>Null, 'source'=>Null, 'url'=>Null);
 	$a_safe = array_map('db_safe', array_merge($defaults, $args));
-	$a_safe['added'] = 'NOW()';
+	$a_safe['added'] = db_safe(date('Y-m-d H:i:s'));
 	$q = "INSERT INTO `items` (" . implode(',', array_keys($a_safe)) . ") VALUES (" . implode(',', $a_safe) . ")";
 	$r = mysqli_query($GLOBALS['dbc'], $q);
 	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
@@ -162,7 +162,7 @@ function db_safe($v, $s="'"){
 }
 
 function delete_item($id){
-	$q = "UPDATE `items` SET `deleted`=NOW() WHERE id=" . db_safe($id) . " LIMIT 1";
+	$q = "UPDATE `items` SET `deleted`=" . db_safe(date('Y-m-d H:i:s')) . " WHERE id=" . db_safe($id) . " LIMIT 1";
 	$r = mysqli_query($GLOBALS['dbc'], $q);
 	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
 		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']));
@@ -210,7 +210,7 @@ function setup_database(){
 function update_item($id, $args){
 	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
 	$a_safe = array_map('db_safe', $args);
-	$a_safe['updated'] = 'NOW()';
+	$a_safe['updated'] = db_safe(date('Y-m-d H:i:s'));
 	$update_args = array();
 	foreach($a_safe as $k=>$v){
 		$update_args[] = $k . '=' . $v;
