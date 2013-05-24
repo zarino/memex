@@ -3,195 +3,195 @@
 /* DEALING WITH REQUESTS, ISSUING RESPONSES */
 
 function handle_put_delete(){
-	$GLOBALS['_PUT'] = $GLOBALS['_DELETE'] = array();
-	if($_SERVER['REQUEST_METHOD'] == 'PUT') {
-		parse_str(file_get_contents("php://input"),$post_vars);
-		$GLOBALS['_PUT'] = $post_vars;
-	} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
-		parse_str(file_get_contents("php://input"),$post_vars);
-		$GLOBALS['_DELETE'] = $post_vars;
-	}
+    $GLOBALS['_PUT'] = $GLOBALS['_DELETE'] = array();
+    if($_SERVER['REQUEST_METHOD'] == 'PUT') {
+        parse_str(file_get_contents("php://input"),$post_vars);
+        $GLOBALS['_PUT'] = $post_vars;
+    } else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+        parse_str(file_get_contents("php://input"),$post_vars);
+        $GLOBALS['_DELETE'] = $post_vars;
+    }
 }
 
 function handle($methods){
-	global $resp;
-	if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
-		$resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
-		$methods[$_SERVER['REQUEST_METHOD']]['handler']();
-	} else {
-		if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
-			$resp->set_status(405);
-		}
-		$resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
-		$resp->set_options($methods);
-		$resp->send();
-	}
+    global $resp;
+    if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
+        $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
+        $methods[$_SERVER['REQUEST_METHOD']]['handler']();
+    } else {
+        if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
+            $resp->set_status(405);
+        }
+        $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
+        $resp->set_options($methods);
+        $resp->send();
+    }
 }
 
 class Response {
 
-	public $response;
+    public $response;
 
-	public function __construct() {
-		$this->response = array('request' => array(
-			'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
-			'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
-			'REQUEST_URI' => $_SERVER['REQUEST_URI'],
-			'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
-			'REQUEST_TIME' => $_SERVER['REQUEST_TIME']
-		), 'responses' => array(), 'data' => array());
-		$this->status_code = 200;
-		$this->headers = array();
-	}
+    public function __construct() {
+        $this->response = array('request' => array(
+            'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
+            'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
+            'REQUEST_URI' => $_SERVER['REQUEST_URI'],
+            'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
+            'REQUEST_TIME' => $_SERVER['REQUEST_TIME']
+        ), 'responses' => array(), 'data' => array());
+        $this->status_code = 200;
+        $this->headers = array();
+    }
 
-	public function add_data($data){
-		$this->response['data'][] = $data;
-	}
-	
-	public function add_error($type, $error, $input, $file, $line){
-		if(!isset($this->response['errors'])){
-			$this->response['errors'] = array();
-		}
-		$this->response['errors'][] = array(
-			'type' => $type,
-			'error' => $error,
-			'query' => $input,
-			'file' => $file,
-			'line' => $line
-		);
-	}
+    public function add_data($data){
+        $this->response['data'][] = $data;
+    }
+    
+    public function add_error($type, $error, $input, $file, $line){
+        if(!isset($this->response['errors'])){
+            $this->response['errors'] = array();
+        }
+        $this->response['errors'][] = array(
+            'type' => $type,
+            'error' => $error,
+            'query' => $input,
+            'file' => $file,
+            'line' => $line
+        );
+    }
 
-	public function add_header($key, $value){
-		$this->headers[$key] = $value;
-	}
+    public function add_header($key, $value){
+        $this->headers[$key] = $value;
+    }
 
-	public function add_response($message){
-		$this->response['responses'][] = $message;
-	}
+    public function add_response($message){
+        $this->response['responses'][] = $message;
+    }
 
-	public function set_options($methods){
-		$a = array();
-		foreach($methods as $method => $properties){
-			$a[$method] = $properties['description'];
-		}
-		$a['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
-		$this->response['options'] = $a;
-		$this->add_response('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
-	}
+    public function set_options($methods){
+        $a = array();
+        foreach($methods as $method => $properties){
+            $a[$method] = $properties['description'];
+        }
+        $a['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
+        $this->response['options'] = $a;
+        $this->add_response('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
+    }
 
-	public function set_status($status_code){
-		global $HTTP_CODES;
-		if(in_array($status_code, array_keys($HTTP_CODES))){
-			$this->status_code = $status_code;
-		} else {
-			throw new Exception($status_code . ' is not a valid HTTP status code');
-		}
-	}
+    public function set_status($status_code){
+        global $HTTP_CODES;
+        if(in_array($status_code, array_keys($HTTP_CODES))){
+            $this->status_code = $status_code;
+        } else {
+            throw new Exception($status_code . ' is not a valid HTTP status code');
+        }
+    }
 
-	public function send(){
-		global $HTTP_CODES;
-		header($_SERVER['SERVER_PROTOCOL'] . ' ' . $this->status_code . ' ' . $HTTP_CODES[$this->status_code]);
-		foreach($this->headers as $key=>$value){
-			header($key . ': ' . $value);
-		}
-		$this->add_header('Content-Type', 'application/json');
-		print pretty_json(json_encode($this->response)) . "\n";
-	}
+    public function send(){
+        global $HTTP_CODES;
+        header($_SERVER['SERVER_PROTOCOL'] . ' ' . $this->status_code . ' ' . $HTTP_CODES[$this->status_code]);
+        foreach($this->headers as $key=>$value){
+            header($key . ': ' . $value);
+        }
+        $this->add_header('Content-Type', 'application/json');
+        print pretty_json(json_encode($this->response)) . "\n";
+    }
 }
 
 /* DATABASE FUNCTIONS */
 
 function add_item($args){
-	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
-	$defaults = array('title'=>Null, 'content'=>Null, 'source'=>Null, 'url'=>Null);
-	$a_safe = array_map('db_safe', array_merge($defaults, $args));
-	$a_safe['added'] = db_safe(date('Y-m-d H:i:s'));
-	$q = "INSERT INTO `items` (" . implode(',', array_keys($a_safe)) . ") VALUES (" . implode(',', $a_safe) . ")";
-	$r = mysqli_query($GLOBALS['dbc'], $q);
-	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
-		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
-	} else {
-		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'insert_id'=>mysqli_insert_id($GLOBALS['dbc']));
-	}
+    // $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
+    $defaults = array('title'=>Null, 'content'=>Null, 'source'=>Null, 'url'=>Null);
+    $a_safe = array_map('db_safe', array_merge($defaults, $args));
+    $a_safe['added'] = db_safe(date('Y-m-d H:i:s'));
+    $q = "INSERT INTO `items` (" . implode(',', array_keys($a_safe)) . ") VALUES (" . implode(',', $a_safe) . ")";
+    $r = mysqli_query($GLOBALS['dbc'], $q);
+    if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+        return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
+    } else {
+        return array('success'=>True, 'query'=>$q, 'error'=>Null, 'insert_id'=>mysqli_insert_id($GLOBALS['dbc']));
+    }
 }
 
 function connect_to_database(){
-	$GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
-	mysqli_set_charset($GLOBALS['dbc'], 'utf8');
-	mysqli_query($GLOBALS['dbc'], "SET time_zone='" + get_mysql_timezone_offset() + "';");
+    $GLOBALS['dbc'] = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) OR die ('Could not connect to MySQL: ' . mysqli_connect_error() );
+    mysqli_set_charset($GLOBALS['dbc'], 'utf8');
+    mysqli_query($GLOBALS['dbc'], "SET time_zone='" + get_mysql_timezone_offset() + "';");
 }
 
 function db_safe($v, $s="'"){
-	if(is_null($v)){
-		return 'NULL';
-	} else if(is_string($v) || is_int($v) || is_float($v) || is_numeric($v)) {
-		return $s . mysqli_real_escape_string($GLOBALS['dbc'], (string) $v) . $s;
-	} else {
-		throw new Exception("db_safe() can't handle arguments of type " . gettype($v));
-	}
+    if(is_null($v)){
+        return 'NULL';
+    } else if(is_string($v) || is_int($v) || is_float($v) || is_numeric($v)) {
+        return $s . mysqli_real_escape_string($GLOBALS['dbc'], (string) $v) . $s;
+    } else {
+        throw new Exception("db_safe() can't handle arguments of type " . gettype($v));
+    }
 }
 
 function delete_item($id){
-	$q = "UPDATE `items` SET `deleted`=" . db_safe(date('Y-m-d H:i:s')) . " WHERE id=" . db_safe($id) . " LIMIT 1";
-	$r = mysqli_query($GLOBALS['dbc'], $q);
-	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
-		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']));
-	} else {
-		return array('success'=>True, 'query'=>$q, 'error'=>Null);
-	}
+    $q = "UPDATE `items` SET `deleted`=" . db_safe(date('Y-m-d H:i:s')) . " WHERE id=" . db_safe($id) . " LIMIT 1";
+    $r = mysqli_query($GLOBALS['dbc'], $q);
+    if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+        return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']));
+    } else {
+        return array('success'=>True, 'query'=>$q, 'error'=>Null);
+    }
 }
 
 function get_items($args){
-	// $args is an array of arguments, such as 'id', 'limit', 'order' and 'search'
-	$q = "SELECT * FROM `items` WHERE `deleted` IS NULL";
-	if(isset($args['id'])){ $q = $q . " AND id=" . db_safe($args['id']); }
-	if(isset($args['order'])){ $q = $q . " ORDER BY " . db_safe($args['order'], ''); }
-	if(isset($args['limit'])){ $q = $q . " LIMIT " . db_safe($args['limit'], ''); }
-	$r = mysqli_query($GLOBALS['dbc'], $q);
-	if (mysqli_error($GLOBALS['dbc'])) {
-		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
-	} else if(mysqli_num_rows($r) == 0) {
-		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>array());
-	} else {
-		$results = array();
-		while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)){
-			$results[] = $row;
-		}
-		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>$results);
-	}
+    // $args is an array of arguments, such as 'id', 'limit', 'order' and 'search'
+    $q = "SELECT * FROM `items` WHERE `deleted` IS NULL";
+    if(isset($args['id'])){ $q = $q . " AND id=" . db_safe($args['id']); }
+    if(isset($args['order'])){ $q = $q . " ORDER BY " . db_safe($args['order'], ''); }
+    if(isset($args['limit'])){ $q = $q . " LIMIT " . db_safe($args['limit'], ''); }
+    $r = mysqli_query($GLOBALS['dbc'], $q);
+    if (mysqli_error($GLOBALS['dbc'])) {
+        return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);
+    } else if(mysqli_num_rows($r) == 0) {
+        return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>array());
+    } else {
+        $results = array();
+        while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)){
+            $results[] = $row;
+        }
+        return array('success'=>True, 'query'=>$q, 'error'=>Null, 'results'=>$results);
+    }
 }
 
 function get_mysql_timezone_offset(){
-	$tz = new DateTimeZone("Europe/London");
-	$dt = new DateTime("now", $tz);
-	$mins = $dt->getOffset() / 60;
-	$sgn = ($mins < 0 ? -1 : 1);
-	$mins = abs($mins);
-	$hrs = floor($mins / 60);
-	$mins -= $hrs * 60;
-	return sprintf('%+d:%02d', $hrs*$sgn, $mins);
+    $tz = new DateTimeZone("Europe/London");
+    $dt = new DateTime("now", $tz);
+    $mins = $dt->getOffset() / 60;
+    $sgn = ($mins < 0 ? -1 : 1);
+    $mins = abs($mins);
+    $hrs = floor($mins / 60);
+    $mins -= $hrs * 60;
+    return sprintf('%+d:%02d', $hrs*$sgn, $mins);
 }
 
 function setup_database(){
-	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
-	mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
+    mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS items (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, url VARCHAR(255) NULL, added DATETIME NULL, viewed DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
+    mysqli_query($GLOBALS['dbc'], 'CREATE TABLE IF NOT EXISTS reminders (id INT PRIMARY KEY AUTO_INCREMENT, item_id INT NULL, reminder_datetime DATETIME NULL, medium VARCHAR(32) NULL, destination VARCHAR(255) NULL, content TEXT NULL, source VARCHAR(32) NULL, added DATETIME NULL, reminded DATETIME NULL, updated DATETIME NULL, deleted DATETIME NULL)');
 }
 
 function update_item($id, $args){
-	// $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
-	$a_safe = array_map('db_safe', $args);
-	$a_safe['updated'] = db_safe(date('Y-m-d H:i:s'));
-	$update_args = array();
-	foreach($a_safe as $k=>$v){
-		$update_args[] = $k . '=' . $v;
-	}
-	$q = "UPDATE `items` SET " . implode(',', $update_args) . " WHERE id=" . db_safe($id);
-	$r = mysqli_query($GLOBALS['dbc'], $q);
-	if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
-		return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'update_id'=>Null);
-	} else {
-		return array('success'=>True, 'query'=>$q, 'error'=>Null, 'update_id'=>$id);
-	}
+    // $args is an array of item attributes, like 'title', 'content', 'source' and 'url'
+    $a_safe = array_map('db_safe', $args);
+    $a_safe['updated'] = db_safe(date('Y-m-d H:i:s'));
+    $update_args = array();
+    foreach($a_safe as $k=>$v){
+        $update_args[] = $k . '=' . $v;
+    }
+    $q = "UPDATE `items` SET " . implode(',', $update_args) . " WHERE id=" . db_safe($id);
+    $r = mysqli_query($GLOBALS['dbc'], $q);
+    if (mysqli_error($GLOBALS['dbc']) || mysqli_affected_rows($GLOBALS['dbc']) == 0) {
+        return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'update_id'=>Null);
+    } else {
+        return array('success'=>True, 'query'=>$q, 'error'=>Null, 'update_id'=>$id);
+    }
 }
 
 /* UTILITY FUNCTIONS */
@@ -220,12 +220,12 @@ function integer_to_hash($integer, $base = HASH_CHARS){
 }
 
 function uri_part($index){
-	$parts = array_values(array_filter(explode('/', preg_replace('#(\.json|\.html)$#', '', $_SERVER['REQUEST_URI']))));
-	if($index < count($parts)){
-		return $parts[$index];
-	} else {
-		throw new Exception("Cannot return part #" . $index . ': REQUEST_URI "' . $_SERVER['REQUEST_URI'] . '" only has ' . count($parts) . ' part' . pluralise(count($parts)));
-	}
+    $parts = array_values(array_filter(explode('/', preg_replace('#(\.json|\.html)$#', '', $_SERVER['REQUEST_URI']))));
+    if($index < count($parts)){
+        return $parts[$index];
+    } else {
+        throw new Exception("Cannot return part #" . $index . ': REQUEST_URI "' . $_SERVER['REQUEST_URI'] . '" only has ' . count($parts) . ' part' . pluralise(count($parts)));
+    }
 }
 
 /* STRING FUNCTIONS */
@@ -244,20 +244,20 @@ function ends_with($haystack, $needle){
 
 # Turns an array into a list like: "First, second and third"
 function human_list($items, $separator='and'){
-	$last = array_pop($items);
-	return implode(', ', $items) . ' $separator ' . $last;
+    $last = array_pop($items);
+    return implode(', ', $items) . ' $separator ' . $last;
 }
 
 function pluralise($number, $plural_suffix='s', $singular_suffix=''){
-	if(is_int($number) || is_float($number)){
-		if($number == 1){
-			return $singular_suffix;
-		} else {
-			return $plural_suffix;
-		}
-	} else {
-		throw new Exception("pluralise() was passed a non-integer, non-float argument");
-	}
+    if(is_int($number) || is_float($number)){
+        if($number == 1){
+            return $singular_suffix;
+        } else {
+            return $plural_suffix;
+        }
+    } else {
+        throw new Exception("pluralise() was passed a non-integer, non-float argument");
+    }
 }
 
 # Returns a pretty json string with whitespace and linebreaks
@@ -297,23 +297,23 @@ function pretty_json($json) {
 }
 
 function pretty_print_r($arg1, $arg2='', $suffix=''){
-	if(is_array($arg1) || is_object($arg1)){
-		$array = $arg1;
-	} else if(is_array($arg2) || is_object($arg2)) {
-		$array = $arg2;
-	}
-	if(is_string($arg1)){
-		$prefix = $arg1;
-	} else if(is_string($arg2)) {
-		$prefix = $arg2;
-	}
-	if(isset($prefix) && isset($array)){
-		print $prefix . '<pre>';
-		print_r($array);
-		print '</pre>' . $suffix;
-	} else {
-	    throw new Exception("Incorrect parameters supplied to pretty_print_r() - function takes an optional string prefix, a required array, and an optional string suffix");
-	}
+    if(is_array($arg1) || is_object($arg1)){
+        $array = $arg1;
+    } else if(is_array($arg2) || is_object($arg2)) {
+        $array = $arg2;
+    }
+    if(is_string($arg1)){
+        $prefix = $arg1;
+    } else if(is_string($arg2)) {
+        $prefix = $arg2;
+    }
+    if(isset($prefix) && isset($array)){
+        print $prefix . '<pre>';
+        print_r($array);
+        print '</pre>' . $suffix;
+    } else {
+        throw new Exception("Incorrect parameters supplied to pretty_print_r() - function takes an optional string prefix, a required array, and an optional string suffix");
+    }
 }
 
 ?>
