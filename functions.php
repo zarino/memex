@@ -13,27 +13,6 @@ function handle_put_delete(){
 	}
 }
 
-function parse_request(){
-	# set default response formats
-	if($_SERVER['REQUEST_URI'] == '/'){
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
-	} else {
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-	}
-	# use JSON or HTML format if specified in REQUEST_URI
-	if(ends_with(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '.json')){
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-	} else if(ends_with(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '.html')){
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
-	}
-	# allow override using HTTP headers
-	if((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT']=='application/json') || (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE']=='application/json')){
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'json';
-	} else if((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT']=='text/html') || (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE']=='text/html')){
-		$GLOBALS['_SERVER']['RESPONSE_FORMAT'] = 'html';
-	}
-}
-
 function handle($methods){
 	global $resp;
 	if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
@@ -59,8 +38,7 @@ class Response {
 			'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
 			'REQUEST_URI' => $_SERVER['REQUEST_URI'],
 			'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
-			'REQUEST_TIME' => $_SERVER['REQUEST_TIME'],
-			'RESPONSE_FORMAT' => $_SERVER['RESPONSE_FORMAT']
+			'REQUEST_TIME' => $_SERVER['REQUEST_TIME']
 		), 'responses' => array(), 'data' => array());
 		$this->status_code = 200;
 		$this->headers = array();
@@ -116,16 +94,8 @@ class Response {
 		foreach($this->headers as $key=>$value){
 			header($key . ': ' . $value);
 		}
-		if($_SERVER['RESPONSE_FORMAT']=='json'){
-			$this->add_header('Content-Type', 'application/json');
-			print pretty_json(json_encode($this->response)) . "\n";
-		} else if($_SERVER['RESPONSE_FORMAT']=='html'){
-			$this->add_header('Content-Type', 'text/html');
-			pretty_print_r($this->response, "\n");
-		} else {
-			$this->add_header('Content-Type', 'text/html');
-			throw new Exception('Could not print response object to requested format: ' . $_SERVER['RESPONSE_FORMAT']);
-		}
+		$this->add_header('Content-Type', 'application/json');
+		print pretty_json(json_encode($this->response)) . "\n";
 	}
 }
 

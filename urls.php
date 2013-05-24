@@ -8,10 +8,10 @@
 
 $urls = array(
 	array('^/$','homepage'),
-	array('^/items(/|\.html|\.json)?(\?.+)?$','items'),
-	array('^/items/[a-zA-Z0-9]+(/|\.html|\.json)?(\?.+)?$','item'),
-	array('^/reminders(/|\.html|\.json)?(\?.+)?$','reminders'),
-	array('^/reminder/[a-zA-Z0-9]+(/|\.html|\.json)?(\?.+)?$','reminder'),
+	array('^/items/?(\?.+)?$','items'),
+	array('^/items/[a-zA-Z0-9]+/?(\?.+)?$','item'),
+	array('^/reminders/?(\?.+)?$','reminders'),
+	array('^/reminder/[a-zA-Z0-9]+/?(\?.+)?$','reminder'),
 	array('.','fourohfour')
 );
 
