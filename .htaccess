@@ -8,12 +8,4 @@ AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css a
 # Disable automatic directory indexing
 Options -indexes
 
-# Redirects
-<ifmodule mod_rewrite.c>
-RewriteEngine   on
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule     ^.*$    index.php   [L]
-</ifmodule>
-
 php_flag magic_quotes_gpc Off
