@@ -4,7 +4,8 @@
 //  We define mappings between REQUEST_URIs and functions from endpoints.php
 //  array('<uri_regexp>','<endpoint_function>')
 
-//  Hash symbols '#' in the <uri_regexp> must be escaped.
+//  Hash symbols '#' in the <uri_regexp> must be escaped
+//  (because we use '#' as the regexp boundary character in index.php)
 
 $urls = array(
     array('^/api/$','homepage'),
