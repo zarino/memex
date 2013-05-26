@@ -18,6 +18,8 @@ function handle($methods){
     if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
         $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
         $methods[$_SERVER['REQUEST_METHOD']]['handler']();
+    } else if(in_array('*', array_keys($methods))){
+        $methods['*']['handler']();
     } else {
         if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
             $resp->set_status(405);
@@ -31,6 +33,8 @@ function handle($methods){
 class Response {
 
     public $response;
+    
+    public $sent = False;
 
     public function __construct() {
         $this->response = array('request' => array(
@@ -95,6 +99,7 @@ class Response {
             header($key . ': ' . $value);
         }
         $this->add_header('Content-Type', 'application/json');
+        $this->sent = True;
         print pretty_json(json_encode($this->response)) . "\n";
     }
 }

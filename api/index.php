@@ -11,11 +11,17 @@ connect_to_database();
 
 $resp = new Response();
 
+# find the right endpoint
 foreach($urls as $regexp => $handler){
     if(preg_match('#^/api' . $regexp . '(\?.+)?$#', $_SERVER['REQUEST_URI'])){
-        $handler();
+        handle($endpoints[$handler]);
         break;
     }
+}
+
+# couldn't find the right endpoint!
+if(!$resp->sent){
+    fourohfour();
 }
 
 ?>
