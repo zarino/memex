@@ -23,9 +23,9 @@ function handle($methods){
     } else {
         if($_SERVER['REQUEST_METHOD'] != 'OPTIONS'){
             $resp->set_status(405);
+            $resp->add_message($_SERVER['REQUEST_METHOD'] . ' method not allowed');
         }
         $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
-        $resp->add_message($_SERVER['REQUEST_METHOD'] . ' method not allowed');
         $resp->add_message('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
         $options = array();
         foreach($methods as $method => $properties){
