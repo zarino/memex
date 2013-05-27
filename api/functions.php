@@ -90,6 +90,22 @@ class Response {
         }
     }
 
+    public function set_limit($limit){
+        if(is_null($limit)){
+            unset($this->response['limit']);
+        } else {
+            $this->response['limit'] = int($limit);
+        }
+    }
+
+    public function set_offset($offset){
+        if(is_null($offset)){
+            unset($this->response['offset']);
+        } else {
+            $this->response['offset'] = int($offset);
+        }
+    }
+
     public function send(){
         global $HTTP_CODES;
         header($_SERVER['SERVER_PROTOCOL'] . ' ' . $this->status_code . ' ' . $HTTP_CODES[$this->status_code]);
