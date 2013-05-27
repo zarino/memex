@@ -25,6 +25,7 @@ function handle($methods){
             $resp->set_status(405);
         }
         $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
+        $resp->add_message($_SERVER['REQUEST_METHOD'] . ' method not allowed');
         $resp->set_options($methods);
         $resp->send();
     }
