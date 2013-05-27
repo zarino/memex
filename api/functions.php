@@ -26,7 +26,13 @@ function handle($methods){
         }
         $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
         $resp->add_message($_SERVER['REQUEST_METHOD'] . ' method not allowed');
-        $resp->set_options($methods);
+        $resp->add_message('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
+        $options = array();
+        foreach($methods as $method => $properties){
+            $options[$method] = $properties['description'];
+        }
+        $options['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
+        $resp->add_data($options);
         $resp->send();
     }
 }
@@ -38,15 +44,15 @@ class Response {
     public $sent = False;
 
     public function __construct() {
-        $this->response = array(
-            'message' => array(),
-            'data' => array()
-        );
+        $this->response = array();
         $this->status_code = 200;
         $this->headers = array();
     }
 
     public function add_data($data){
+        if(!isset($this->response['data'])){
+            $this->response['data'] = array();
+        }
         $this->response['data'][] = $data;
     }
     
@@ -68,17 +74,10 @@ class Response {
     }
 
     public function add_message($message){
-        $this->response['message'][] = $message;
-    }
-
-    public function set_options($methods){
-        $a = array();
-        foreach($methods as $method => $properties){
-            $a[$method] = $properties['description'];
+        if(!isset($this->response['message'])){
+            $this->response['message'] = array();
         }
-        $a['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
-        $this->response['options'] = $a;
-        $this->add_message('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
+        $this->response['message'][] = $message;
     }
 
     public function set_status($status_code){
