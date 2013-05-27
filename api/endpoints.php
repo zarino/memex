@@ -83,16 +83,26 @@ function getHomepage(){
 
 function getItems(){
     global $resp;
+    $options = array(
+        'order' => 'COALESCE(updated, added) DESC',
+        'limit' => 100,
+        'offset' => 0
+    );
     if(isset($_GET['order'])){
-        $order = $_GET['order'];
-    } else {
-        $order = 'COALESCE(updated, added) DESC';
+        $options['order'] = $_GET['order'];
     }
-    $r = get_items(array('order'=>$order));
+    if(isset($_GET['limit'])){
+        $options['limit'] = $_GET['limit'];
+    }
+    if(isset($_GET['offset'])){
+        $options['offset'] = $_GET['offset'];
+    }
+    $r = get_items($options);
+    $resp->set_limit($options['limit']);
+    $resp->set_offset($options['offset']);
     if($r['success']){
         if($r['results']){
-            $c = count($r['results']);
-            $resp->add_message($c . ' item' . pluralise($c) . ' in database');
+            $resp->set_count(count($r['results']));
             foreach($r['results'] as $item){
                 $resp->add_data($item);
             }
@@ -115,7 +125,7 @@ function postItems(){
     if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
     $r = add_item($args);
     if($r['success']){
-        $resp->add_message("New item added (item id: " . $r['insert_id'] . ")");
+        $resp->add_message("New item added");
         $resp->set_status(201);
         $resp->add_data(array('id'=>$r['insert_id']));
     } else {
@@ -130,8 +140,7 @@ function getItem(){
     $r = get_items(array('id'=>uri_part(1)));
     if($r['success']){
         if($r['results']){
-            $c = count($r['results']);
-            $resp->add_message($c . ' matching item' . pluralise($c));
+            $resp->set_count(count($r['results']));
             foreach($r['results'] as $item){
                 $resp->add_data($item);
             }
@@ -154,7 +163,7 @@ function postItem(){
     if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
     $r = update_item(uri_part(1), $args);
     if($r['success']){
-        $resp->add_message("Item updated (item id: " . $r['update_id'] . ")");
+        $resp->add_message("Item updated");
         $resp->add_data(array('id'=>$r['update_id']));
     } else {
         $resp->add_message("Could not query items database");
@@ -174,7 +183,7 @@ function putItem(){
     if(isset($_PUT['url'])){ $args['url'] = $_PUT['url']; }
     $r = add_item($args);
     if($r['success']){
-        $resp->add_message("New item added (item id: " . $r['insert_id'] . ")");
+        $resp->add_message("New item added");
         $resp->set_status(201);
         $resp->add_data(array('id'=>$r['insert_id']));
     } else {
@@ -189,10 +198,10 @@ function deleteItem(){
     $resp->add_message('You requested to the delete the item the id: ' . uri_part(1));
     $r = delete_item(uri_part(1));
     if($r['success']){
-        $resp->add_message("Item " . uri_part(1) . " deleted");
+        $resp->add_message("Item deleted");
     } else {
         $resp->set_status(404);
-        $resp->add_message("Item " . uri_part(1) . " could not be deleted");
+        $resp->add_message("Item could not be deleted");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 6);
     }
     $resp->send();
