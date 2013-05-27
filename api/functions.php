@@ -89,6 +89,14 @@ class Response {
         }
     }
 
+    public function set_count($count){
+        if(is_null($count)){
+            unset($this->response['count']);
+        } else {
+            $this->response['count'] = int($count);
+        }
+    }
+
     public function set_limit($limit){
         if(is_null($limit)){
             unset($this->response['limit']);
