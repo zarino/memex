@@ -69,8 +69,8 @@ function getHomepage(){
     global $resp;
     global $urls;
     global $endpoints;
-    $resp->add_response('Welcome to MEMEX.');
-    $resp->add_response('MEMEX is a system for remembering stuff.');
+    $resp->add_message('Welcome to MEMEX.');
+    $resp->add_message('MEMEX is a system for remembering stuff.');
     $help = array();
     foreach($urls as $url => $handler){
         foreach($endpoints[$handler] as $method => $info){
@@ -92,15 +92,15 @@ function getItems(){
     if($r['success']){
         if($r['results']){
             $c = count($r['results']);
-            $resp->add_response($c . ' item' . pluralise($c) . ' in database');
+            $resp->add_message($c . ' item' . pluralise($c) . ' in database');
             foreach($r['results'] as $item){
                 $resp->add_data($item);
             }
         } else {
-            $resp->add_response('No items returned by query');
+            $resp->add_message('No items returned by query');
         }
     } else {
-        $resp->add_response("Could not query items database");
+        $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
     }
     $resp->send();
@@ -115,11 +115,11 @@ function postItems(){
     if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
     $r = add_item($args);
     if($r['success']){
-        $resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
+        $resp->add_message("New item added (item id: " . $r['insert_id'] . ")");
         $resp->set_status(201);
         $resp->add_data(array('id'=>$r['insert_id']));
     } else {
-        $resp->add_response("New item could not be added");
+        $resp->add_message("New item could not be added");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
     }
     $resp->send();
@@ -131,15 +131,15 @@ function getItem(){
     if($r['success']){
         if($r['results']){
             $c = count($r['results']);
-            $resp->add_response($c . ' matching item' . pluralise($c));
+            $resp->add_message($c . ' matching item' . pluralise($c));
             foreach($r['results'] as $item){
                 $resp->add_data($item);
             }
         } else {
-            $resp->add_response('No items returned by query');
+            $resp->add_message('No items returned by query');
         }
     } else {
-        $resp->add_response("Could not query items database");
+        $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
     }
     $resp->send();
@@ -154,10 +154,10 @@ function postItem(){
     if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
     $r = update_item(uri_part(1), $args);
     if($r['success']){
-        $resp->add_response("Item updated (item id: " . $r['update_id'] . ")");
+        $resp->add_message("Item updated (item id: " . $r['update_id'] . ")");
         $resp->add_data(array('id'=>$r['update_id']));
     } else {
-        $resp->add_response("Could not query items database");
+        $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
     }
     $resp->send();
@@ -166,7 +166,7 @@ function postItem(){
 function putItem(){
     global $_PUT;
     global $resp;
-    $resp->add_response('You requested to create an item the id: ' . uri_part(1));
+    $resp->add_message('You requested to create an item the id: ' . uri_part(1));
     $args = array('id' => uri_part(1));
     if(isset($_PUT['title'])){ $args['title'] = $_PUT['title']; }
     if(isset($_PUT['content'])){ $args['content'] = $_PUT['content']; }
@@ -174,11 +174,11 @@ function putItem(){
     if(isset($_PUT['url'])){ $args['url'] = $_PUT['url']; }
     $r = add_item($args);
     if($r['success']){
-        $resp->add_response("New item added (item id: " . $r['insert_id'] . ")");
+        $resp->add_message("New item added (item id: " . $r['insert_id'] . ")");
         $resp->set_status(201);
         $resp->add_data(array('id'=>$r['insert_id']));
     } else {
-        $resp->add_response("New item could not be added");
+        $resp->add_message("New item could not be added");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
     }
     $resp->send();
@@ -186,13 +186,13 @@ function putItem(){
 
 function deleteItem(){
     global $resp;
-    $resp->add_response('You requested to the delete the item the id: ' . uri_part(1));
+    $resp->add_message('You requested to the delete the item the id: ' . uri_part(1));
     $r = delete_item(uri_part(1));
     if($r['success']){
-        $resp->add_response("Item " . uri_part(1) . " deleted");
+        $resp->add_message("Item " . uri_part(1) . " deleted");
     } else {
         $resp->set_status(404);
-        $resp->add_response("Item " . uri_part(1) . " could not be deleted");
+        $resp->add_message("Item " . uri_part(1) . " could not be deleted");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 6);
     }
     $resp->send();
@@ -200,32 +200,32 @@ function deleteItem(){
 
 function reminders(){
     global $resp;
-    $resp->add_response('reminders endpoint: under construction');
+    $resp->add_message('reminders endpoint: under construction');
     $resp->send();
 }
 
 function reminder(){
     global $resp;
-    $resp->add_response('reminder endpoint: under construction');
+    $resp->add_message('reminder endpoint: under construction');
     $resp->send();
 }
 
 function updates(){
     global $resp;
-    $resp->add_response('updates endpoint: under construction');
+    $resp->add_message('updates endpoint: under construction');
     $resp->send();
 }
 
 function settings(){
     global $resp;
-    $resp->add_response('settings endpoint: under construction');
+    $resp->add_message('settings endpoint: under construction');
     $resp->send();
 }
 
 function fourohfour(){
     global $resp;
     $resp->set_status(404);
-    $resp->add_response("You requested something we don't have");
+    $resp->add_message("You requested something we don't have");
     $resp->send();
 }
 

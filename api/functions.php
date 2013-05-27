@@ -69,8 +69,8 @@ class Response {
         $this->headers[$key] = $value;
     }
 
-    public function add_response($message){
-        $this->response['responses'][] = $message;
+    public function add_message($message){
+        $this->response['message'][] = $message;
     }
 
     public function set_options($methods){
@@ -80,7 +80,7 @@ class Response {
         }
         $a['OPTIONS'] = 'show the HTTP methods this endpoint accepts';
         $this->response['options'] = $a;
-        $this->add_response('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
+        $this->add_message('This endpoint accepts ' . implode(', ', array_keys($methods)) . ', and OPTIONS requests');
     }
 
     public function set_status($status_code){
