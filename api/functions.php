@@ -113,6 +113,14 @@ class Response {
         }
     }
 
+    public function set_order($order){
+        if(is_null($order)){
+            unset($this->response['order']);
+        } else {
+            $this->response['order'] = $order;
+        }
+    }
+
     public function send(){
         global $HTTP_CODES;
         header($_SERVER['SERVER_PROTOCOL'] . ' ' . $this->status_code . ' ' . $HTTP_CODES[$this->status_code]);
@@ -178,7 +186,12 @@ function get_items($args){
     $q = "SELECT * FROM `items` WHERE `deleted` IS NULL";
     if(isset($args['id'])){ $q = $q . " AND id=" . db_safe($args['id']); }
     if(isset($args['order'])){ $q = $q . " ORDER BY " . db_safe($args['order'], ''); }
-    if(isset($args['limit'])){ $q = $q . " LIMIT " . db_safe($args['limit'], ''); }
+    if(isset($args['limit'])){
+        $q = $q . " LIMIT " . db_safe($args['limit'], '');
+        if(isset($args['offset'])){
+            $q = $q . " OFFSET " . db_safe($args['offset'], '');
+        }
+    }
     $r = mysqli_query($GLOBALS['dbc'], $q);
     if (mysqli_error($GLOBALS['dbc'])) {
         return array('success'=>False, 'query'=>$q, 'error'=>mysqli_error($GLOBALS['dbc']), 'insert_id'=>Null);

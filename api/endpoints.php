@@ -100,6 +100,7 @@ function getItems(){
     $r = get_items($options);
     $resp->set_limit($options['limit']);
     $resp->set_offset($options['offset']);
+    $resp->set_order($options['order']);
     if($r['success']){
         if($r['results']){
             $resp->set_count(count($r['results']));
