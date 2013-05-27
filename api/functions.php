@@ -93,7 +93,7 @@ class Response {
         if(is_null($count)){
             unset($this->response['count']);
         } else {
-            $this->response['count'] = int($count);
+            $this->response['count'] = (int) $count;
         }
     }
 
@@ -101,7 +101,7 @@ class Response {
         if(is_null($limit)){
             unset($this->response['limit']);
         } else {
-            $this->response['limit'] = int($limit);
+            $this->response['limit'] = (int) $limit;
         }
     }
 
@@ -109,7 +109,7 @@ class Response {
         if(is_null($offset)){
             unset($this->response['offset']);
         } else {
-            $this->response['offset'] = int($offset);
+            $this->response['offset'] = (int) $offset;
         }
     }
 
