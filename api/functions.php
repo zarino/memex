@@ -96,7 +96,12 @@ class Response {
             header($key . ': ' . $value);
         }
         $this->add_header('Content-Type', 'application/json');
-        $this->response['status'] = $this->status_code;
+        if($this->status_code < 400){
+            $this->response['status'] = 'ok';
+        } else {
+            $this->response['status'] = 'error';
+        }
+        $this->response['code'] = $this->status_code;
         $this->sent = True;
         print pretty_json(json_encode($this->response)) . "\n";
     }
