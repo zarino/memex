@@ -37,13 +37,10 @@ class Response {
     public $sent = False;
 
     public function __construct() {
-        $this->response = array('request' => array(
-            'HTTP_USER_AGENT' => $_SERVER['HTTP_USER_AGENT'],
-            'HTTP_ACCEPT' => $_SERVER['HTTP_ACCEPT'],
-            'REQUEST_URI' => $_SERVER['REQUEST_URI'],
-            'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
-            'REQUEST_TIME' => $_SERVER['REQUEST_TIME']
-        ), 'responses' => array(), 'data' => array());
+        $this->response = array(
+            'message' => array(),
+            'data' => array()
+        );
         $this->status_code = 200;
         $this->headers = array();
     }
@@ -99,6 +96,7 @@ class Response {
             header($key . ': ' . $value);
         }
         $this->add_header('Content-Type', 'application/json');
+        $this->response['status'] = $this->status_code;
         $this->sent = True;
         print pretty_json(json_encode($this->response)) . "\n";
     }
