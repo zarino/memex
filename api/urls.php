@@ -8,7 +8,7 @@ $urls = array(
     '/items/?' => 'items',
     '/items/[a-zA-Z0-9]+/?' => 'item',
     '/reminders/?' => 'reminders',
-    '/reminder/[a-zA-Z0-9]+/?' => 'reminder'
+    '/reminders/[a-zA-Z0-9]+/?' => 'reminder'
 );
 
 ?>
