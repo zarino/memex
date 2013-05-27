@@ -252,7 +252,7 @@ function integer_to_hash($integer, $base = HASH_CHARS){
 }
 
 function uri_part($index){
-    $parts = array_values(array_filter(explode('/', preg_replace('#(\.json|\.html)$#', '', $_SERVER['REQUEST_URI']))));
+    $parts = array_values(array_filter(explode('/', preg_replace('#\.[a-zA-Z]$#', '', $_SERVER['REQUEST_URI']))));
     if($index < count($parts)){
         return $parts[$index];
     } else {
