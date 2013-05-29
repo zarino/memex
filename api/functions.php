@@ -17,7 +17,13 @@ function handle($methods){
     global $resp;
     if(in_array($_SERVER['REQUEST_METHOD'], array_keys($methods))){
         $resp->add_header('Allow', implode(', ', array_keys($methods)) . ', OPTIONS');
-        $methods[$_SERVER['REQUEST_METHOD']]['handler']();
+        if(is_authenticated($methods[$_SERVER['REQUEST_METHOD']])){
+            $methods[$_SERVER['REQUEST_METHOD']]['handler']();
+        } else {
+            $resp->set_status(403);
+            $resp->add_message('You must supply an apikey to ' . ($_SERVER['REQUEST_METHOD'] == 'GET' ? 'read from' : 'write to' ) . ' this endpoint');
+            $resp->send();
+        }
     } else if(in_array('*', array_keys($methods))){
         $methods['*']['handler']();
     } else {
@@ -37,6 +43,47 @@ function handle($methods){
     }
 }
 
+function is_authenticated($endpoint_settings){
+    global $resp;
+
+    # is this a public endpoint?
+    if(isset($endpoint_settings['public']) && $endpoint_settings['public']){
+        return True;
+    }
+
+    # have they supplied a write apikey?
+    if(!defined('APIKEY_WRITE') || APIKEY_WRITE == '' || APIKEY_WRITE == Null){
+        # apikey has not been set in config-secret.php
+        return True;
+    } else if(isset($_COOKIE['apikey_write']) && $_COOKIE['apikey_write'] == APIKEY_WRITE){
+        # refresh their cookie for another hour
+        $resp->set_cookie('apikey_write', $_COOKIE['apikey_write']);
+        return True;
+    } else if(isset($_GET['apikey']) && $_GET['apikey'] == APIKEY_WRITE){
+        # set a cookie for an hour, so they don't need to supply apikey again
+        $resp->set_cookie('apikey_write', APIKEY_WRITE);
+        return True;
+    }
+
+    # is this is a GET endpoint, and have they supplied a read-only apikey?
+    if($_SERVER['REQUEST_METHOD'] == 'GET'){
+        if(!defined('APIKEY_READ') || APIKEY_READ == '' || APIKEY_READ == Null){
+            # apikey has not been set in config-secret.php
+            return True;
+        } else if(isset($_COOKIE['apikey_read']) && $_COOKIE['apikey_read'] == APIKEY_READ){
+            # refresh their cookie for another hour
+            $resp->set_cookie('apikey_read', $_COOKIE['apikey_read']);
+            return True;
+        } else if(isset($_GET['apikey']) && $_GET['apikey'] == APIKEY_READ){
+            # set a cookie for an hour, so they don't need to supply apikey again
+            $resp->set_cookie('apikey_read', APIKEY_READ);
+            return True;
+        }
+    }
+
+    return False;
+}
+
 class Response {
 
     public $response;
@@ -46,7 +93,8 @@ class Response {
     public function __construct() {
         $this->response = array();
         $this->status_code = 200;
-        $this->headers = array();
+        $this->headers = array('Content-Type' => 'application/json');
+        $this->cookie = Null;
     }
 
     public function add_data($data){
@@ -78,6 +126,22 @@ class Response {
             $this->response['message'] = array();
         }
         $this->response['message'][] = $message;
+    }
+
+    public function set_cookie($name, $value){
+        $this->cookie = array(
+            'name' => $name,
+            'value' => $value,
+            'expires' => time() + 3600,
+        );
+    }
+
+    public function remove_cookie($name){
+        $this->cookie = array(
+            'name' => $name,
+            'value' => False,
+            'expires' => time() - 3600,
+        );
     }
 
     public function set_status($status_code){
@@ -127,7 +191,9 @@ class Response {
         foreach($this->headers as $key=>$value){
             header($key . ': ' . $value);
         }
-        $this->add_header('Content-Type', 'application/json');
+        if(isset($this->cookie)){
+            setcookie($this->cookie['name'], $this->cookie['value'], $this->cookie['expires'], '/api/');
+        }
         if($this->status_code < 400){
             $this->response['status'] = 'ok';
         } else {

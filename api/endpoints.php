@@ -8,7 +8,8 @@ $endpoints = array(
     'homepage' => array(
         'GET' => array(
             'description' => 'show API documentation',
-            'handler' => 'getHomepage'
+            'handler' => 'getHomepage',
+            'public' => True
         )
     ),
     'items' => array(
@@ -71,6 +72,9 @@ function getHomepage(){
     global $endpoints;
     $resp->add_message('Welcome to MEMEX.');
     $resp->add_message('MEMEX is a system for remembering stuff.');
+    $resp->add_message('Security: MEMEX endpoints are secured with two apikeys:');
+    $resp->add_message('- The main apikey allows you to read from and write to all endpoints.');
+    $resp->add_message('- A separate read-only apikey allows you to read only from GET endpoints.');
     $help = array();
     foreach($urls as $url => $handler){
         foreach($endpoints[$handler] as $method => $info){
