@@ -1,12 +1,17 @@
 <?php
 
-define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-# define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyz');
+# Remember to define the following settings
+# in config-secret.php, next to this file
 
-# define('DB_USER', 'override-in-config-secret.php');
-# define('DB_PASSWORD', 'override-in-config-secret.php');
-# define('DB_HOST', 'override-in-config-secret.php');
-# define('DB_NAME', 'override-in-config-secret.php');
+# define('DB_USER', 'xxx');
+# define('DB_PASSWORD', 'xxx');
+# define('DB_HOST', 'xxx');
+# define('DB_NAME', 'xxx');
+
+# define('APIKEY_READ', 'xxx');
+# define('APIKEY_WRITE', 'xxx');
+
+define('HASH_CHARS', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 
 $HTTP_CODES = array(
     100 => 'Continue',
