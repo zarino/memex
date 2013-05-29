@@ -142,7 +142,7 @@ function postItems(){
 
 function getItem(){
     global $resp;
-    $r = get_items(array('id'=>uri_part(1)));
+    $r = get_items(array('id'=>uri_part(2)));
     if($r['success']){
         if($r['results']){
             $resp->set_count(count($r['results']));
@@ -166,7 +166,7 @@ function postItem(){
     if(isset($_POST['content'])){ $args['content'] = $_POST['content']; }
     if(isset($_POST['source'])){ $args['source'] = $_POST['source']; }
     if(isset($_POST['url'])){ $args['url'] = $_POST['url']; }
-    $r = update_item(uri_part(1), $args);
+    $r = update_item(uri_part(2), $args);
     if($r['success']){
         $resp->add_message("Item updated");
         $resp->add_data(array('id'=>$r['update_id']));
@@ -180,8 +180,8 @@ function postItem(){
 function putItem(){
     global $_PUT;
     global $resp;
-    $resp->add_message('You requested to create an item the id: ' . uri_part(1));
-    $args = array('id' => uri_part(1));
+    $resp->add_message('You requested to create an item the id: ' . uri_part(2));
+    $args = array('id' => uri_part(2));
     if(isset($_PUT['title'])){ $args['title'] = $_PUT['title']; }
     if(isset($_PUT['content'])){ $args['content'] = $_PUT['content']; }
     if(isset($_PUT['source'])){ $args['source'] = $_PUT['source']; }
@@ -200,8 +200,8 @@ function putItem(){
 
 function deleteItem(){
     global $resp;
-    $resp->add_message('You requested to the delete the item the id: ' . uri_part(1));
-    $r = delete_item(uri_part(1));
+    $resp->add_message('You requested to the delete the item the id: ' . uri_part(2));
+    $r = delete_item(uri_part(2));
     if($r['success']){
         $resp->add_message("Item deleted");
     } else {
