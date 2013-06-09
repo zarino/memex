@@ -96,10 +96,24 @@ function getItems(){
         $options['order'] = $_GET['order'];
     }
     if(isset($_GET['limit'])){
-        $options['limit'] = $_GET['limit'];
+        if(!ctype_digit((string)$_GET['limit'])){
+            $resp->add_message("limit parameter must be an integer");
+            $resp->set_status(400);
+            $resp->send();
+            return False;
+        } else {
+            $options['limit'] = $_GET['limit'];
+        }
     }
     if(isset($_GET['offset'])){
-        $options['offset'] = $_GET['offset'];
+        if(!ctype_digit((string)$_GET['offset'])){
+            $resp->add_message("offset parameter must be an integer");
+            $resp->set_status(400);
+            $resp->send();
+            return False;
+        } else {
+            $options['offset'] = $_GET['offset'];
+        }
     }
     $r = get_items($options);
     $resp->set_limit($options['limit']);
