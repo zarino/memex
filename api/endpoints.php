@@ -117,6 +117,7 @@ function getItems(){
     } else {
         $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
+        $resp->set_status(500);
     }
     $resp->send();
 }
@@ -136,6 +137,7 @@ function postItems(){
     } else {
         $resp->add_message("New item could not be added");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
+        $resp->set_status(500);
     }
     $resp->send();
 }
@@ -155,6 +157,7 @@ function getItem(){
     } else {
         $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
+        $resp->set_status(500);
     }
     $resp->send();
 }
@@ -173,6 +176,7 @@ function postItem(){
     } else {
         $resp->add_message("Could not query items database");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 13);
+        $resp->set_status(500);
     }
     $resp->send();
 }
@@ -194,6 +198,7 @@ function putItem(){
     } else {
         $resp->add_message("New item could not be added");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 5);
+        $resp->set_status(500);
     }
     $resp->send();
 }
@@ -205,9 +210,9 @@ function deleteItem(){
     if($r['success']){
         $resp->add_message("Item deleted");
     } else {
-        $resp->set_status(404);
         $resp->add_message("Item could not be deleted");
         $resp->add_error('MySQL error', $r['error'], $r['query'], __FILE__, __LINE__ - 6);
+        $resp->set_status(500);
     }
     $resp->send();
 }
