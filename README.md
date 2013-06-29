@@ -4,7 +4,7 @@ A system for remembering stuff. Emails, notes and bookmarks, stored online, acce
 
 ## Installing memex
 
-Memex is designed to run on any entry-level web server. It requires a vaguely modern version of PHP and a MySQL database.
+Memex is designed to run on any entry-level web server. It requires an Apache server, a vaguely modern version of PHP and a MySQL database.
 
 1. Check out this repository into your server's public web directory.
 
