@@ -11,6 +11,7 @@ function handle_put_delete(){
         parse_str(file_get_contents("php://input"),$post_vars);
         $GLOBALS['_DELETE'] = $post_vars;
     }
+    $GLOBALS['_ALL'] = array_merge($GLOBALS['_GET'], $GLOBALS['_POST'], $GLOBALS['_PUT'], $GLOBALS['_DELETE']);
 }
 
 function handle($methods){
@@ -55,13 +56,8 @@ function is_authenticated($endpoint_settings){
     if(!defined('APIKEY_WRITE') || APIKEY_WRITE == '' || APIKEY_WRITE == Null){
         # apikey has not been set in config-secret.php
         return True;
-    } else if(isset($_COOKIE['apikey_write']) && $_COOKIE['apikey_write'] == APIKEY_WRITE){
-        # refresh their cookie for another hour
-        $resp->set_cookie('apikey_write', $_COOKIE['apikey_write']);
-        return True;
-    } else if(isset($_GET['apikey']) && $_GET['apikey'] == APIKEY_WRITE){
-        # set a cookie for an hour, so they don't need to supply apikey again
-        $resp->set_cookie('apikey_write', APIKEY_WRITE);
+    } else if(isset($GLOBALS['_ALL']['apikey']) && $GLOBALS['_ALL']['apikey'] == APIKEY_WRITE){
+        # apikey has been supplied as a query parameter
         return True;
     }
 
@@ -70,13 +66,8 @@ function is_authenticated($endpoint_settings){
         if(!defined('APIKEY_READ') || APIKEY_READ == '' || APIKEY_READ == Null){
             # apikey has not been set in config-secret.php
             return True;
-        } else if(isset($_COOKIE['apikey_read']) && $_COOKIE['apikey_read'] == APIKEY_READ){
-            # refresh their cookie for another hour
-            $resp->set_cookie('apikey_read', $_COOKIE['apikey_read']);
-            return True;
-        } else if(isset($_GET['apikey']) && $_GET['apikey'] == APIKEY_READ){
-            # set a cookie for an hour, so they don't need to supply apikey again
-            $resp->set_cookie('apikey_read', APIKEY_READ);
+        } else if(isset($GLOBALS['_ALL']['apikey']) && $GLOBALS['_ALL']['apikey'] == APIKEY_READ){
+            # apikey has been supplied as a query parameter
             return True;
         }
     }
